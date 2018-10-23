@@ -49,7 +49,7 @@ class SpecBMP180
         uint32_t readRawPressure(void);
 
         int UpdateTimer = 0;
-        const int UpdatePeriod = 0;
+        const int UpdatePeriod = 100;
 
     private:
         int32_t computeB5(int32_t UT);
