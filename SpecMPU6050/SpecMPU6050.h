@@ -40,6 +40,11 @@ namespace SpecMPU6050{
         Wire.endTransmission();
     }
 
+    void setGA(float gyro){
+        gyroCoef = gyro;
+        accCoef = 1.0-gyro;
+    }
+
     void update(){
         Wire.beginTransmission(MPU6050_ADDR);
         Wire.write(0x3B);

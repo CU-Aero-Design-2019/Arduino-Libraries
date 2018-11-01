@@ -5,7 +5,6 @@
 
 #include <TinyGPS++.h>
 
-
 namespace SpecGPS{
 	
 	// timer
@@ -19,8 +18,6 @@ namespace SpecGPS{
 	
 		GPSSerial.begin(GPSSerialBaudrate);
     }
-	
-
 	
 	void displayInfo()
 	{
