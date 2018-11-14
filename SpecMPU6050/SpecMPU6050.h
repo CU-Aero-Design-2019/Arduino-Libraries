@@ -31,7 +31,7 @@ namespace SpecMPU6050{
 	float angleX, angleY, angleZ;
     float interval;
 	long preInterval;
-	float accCoef, gyroCoef;
+	float accCoef = 0.1, gyroCoef = 0.9;
 
     void writeIMU(byte reg, byte data){
         Wire.beginTransmission(MPU6050_ADDR);

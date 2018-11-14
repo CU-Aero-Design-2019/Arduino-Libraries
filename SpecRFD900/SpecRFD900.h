@@ -2,6 +2,7 @@
 #define SPECRFD900_H
 
 #include "SpecBMP180.h"
+#include "SpecMPU6050.h"
 
 extern SpecBMP180 bmp;
 
@@ -46,35 +47,38 @@ void parse()
     }
 }
 
-struct TelemetryStruct
+void sendTelemetry(String data)
 {
-    long sendTime;
-    int altitude;
-};
+    // // make string that everything will be added to
+    // String data = "";
 
-void sendTelemetry()
-{
-    // gather everything to send
-    TelemetryStruct packet;
-    packet.sendTime = millis();
-    packet.altitude = bmp.readAltitude();
-    #ifdef DEBUG
-    //Serial.println(packet.altitude);
-    #endif
+    // // add time
+    // //data += "time";
+    // data += millis();
+    // data += " ";
+    
+    // // add altitude
+    // //data += "alt";
+    // data += bmp.readAltitude();
+    // data += " ";
+    
+    // // add angleX
+    // //data += "angx";
+    // data += SpecMPU6050::angleX;
+    // data += " ";
 
-    // send message header
-    //RFD900->print((char)sizeof(packet));
+    // //data += "temp";
+    // data += SpecMPU6050::temp;
+    // data += " ";
 
-    // send message
-    // for (int addressOffset = 0; addressOffset < sizeof(packet); addressOffset++)
-    // {
-    //     #ifdef DEBUG
-    //     //Serial.println("Writing EEPROM");
-    //     #endif
-    //     RFD900->write(*((char *)&packet + addressOffset));
-    // }
-    RFD900->print(packet.sendTime);
-    RFD900->print(packet.altitude);
+    // data += "\n";
+
+    // // add ending char
+    // //data += 0x17;
+    // Serial.print("writing to rfd: ");
+    // Serial.println(data);
+    const char* charData = data.c_str();
+    RFD900->write(charData, data.length());
 }
 
 // to be called at a regular interval
@@ -97,10 +101,10 @@ void update()
         {
             incoming += (char)Serial.read();
         }
-#ifdef DEBUG
+        #ifdef DEBUG
         Serial.print("Incoming USB Serial Data: ");
         Serial.print(incoming);
-#endif
+        #endif
         // do something with serial input
         USB::parse();
     }
