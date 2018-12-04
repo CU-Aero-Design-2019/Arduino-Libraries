@@ -7,8 +7,8 @@
 namespace SpecMPU6050{
 
     // timer
-    const long UpdatePeriod = 100;
-    long UpdateTimer = 0;
+    const unsigned long UpdatePeriod = 100;
+    unsigned long UpdateTimer = 0;
 
     // communication stuff
     const int MPU6050_ADDR        = 0x68;
@@ -20,8 +20,6 @@ namespace SpecMPU6050{
     const int MPU6050_PWR_MGMT_1  = 0x6b;
     const int MPU6050_TEMP_H      = 0x41;
     const int MPU6050_TEMP_L      = 0x42;
-
-    const int MagAddr = 0x1E;
 
     // vars to store the raw data
     int16_t rawAccX, rawAccY, rawAccZ, rawTemp, rawGyroX, rawGyroY, rawGyroZ;

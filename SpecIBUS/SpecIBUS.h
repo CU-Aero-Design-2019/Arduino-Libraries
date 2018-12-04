@@ -15,8 +15,8 @@ class SpecIBUS
     void setup(void);
     void update(void);
     uint16_t readChannel(uint8_t channelNr);
-    long receiverUpdateTimer = 0;
-    const long receiverUpdatePeriod = 10;
+    unsigned long receiverUpdateTimer = 0;
+    const unsigned long receiverUpdatePeriod = 10;
 
   private:
     enum State

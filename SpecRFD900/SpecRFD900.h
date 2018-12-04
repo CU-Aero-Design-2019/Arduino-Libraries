@@ -8,8 +8,8 @@ extern SpecBMP180 bmp;
 
 namespace SpecRFD900
 {
-int UpdateTimer = 0;
-const int UpdatePeriod = 1;
+unsigned long UpdateTimer = 0;
+const unsigned long UpdatePeriod = 10;
 
 int baudrate = 9600;
 String incoming = "";

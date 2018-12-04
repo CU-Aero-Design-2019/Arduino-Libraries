@@ -56,6 +56,12 @@ boolean SpecBMP180::begin(uint8_t mode)
     Serial.println(md, DEC);
 #endif
 
+    for(int i = 0; i < 100; i++){
+        this->baselineAlt += this->readAltitude();
+        delay(1);
+    }
+    this->baselineAlt /= 100;
+
     return true;
 }
 
@@ -251,6 +257,10 @@ float SpecBMP180::readAltitude(float sealevelPressure)
     altitude = 44330 * (1.0 - pow(pressure / sealevelPressure, 0.1903));
 
     return altitude;
+}
+
+float SpecBMP180::readOffsetAltitude(float sealevelPressure){
+    return (readAltitude(sealevelPressure) - baselineAlt);
 }
 
 /*********************************************************************/

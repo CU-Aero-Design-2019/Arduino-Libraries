@@ -45,11 +45,16 @@ class SpecBMP180
         int32_t readPressure(void);
         int32_t readSealevelPressure(float altitude_meters = 0);
         float readAltitude(float sealevelPressure = 101325); // std atmosphere
+        float readOffsetAltitude(float sealevelPressure = 101325);
         uint16_t readRawTemperature(void);
         uint32_t readRawPressure(void);
 
-        int UpdateTimer = 0;
-        const int UpdatePeriod = 100;
+        unsigned long UpdateTimer = 0;
+        const unsigned long UpdatePeriod = 10;
+
+        float baselineAlt = 0;
+        int nAverageSamples = 0;
+        float averageSum = 0;
 
     private:
         int32_t computeB5(int32_t UT);

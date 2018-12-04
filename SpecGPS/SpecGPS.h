@@ -10,7 +10,7 @@ namespace SpecGPS
 
 // timer
 const long UpdatePeriod = 100;
-long UpdateTimer = 0;
+unsigned long UpdateTimer = 0;
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -77,7 +77,7 @@ void displayInfo()
 
 void update() {
 	// This sketch displays information every time a new sentence is correctly encoded.
-	while (GPSSerial.available() > 0){}
+	while (GPSSerial.available() > 0){
 		gps.encode(GPSSerial.read());
 	}
 }
