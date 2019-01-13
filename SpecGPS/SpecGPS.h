@@ -7,6 +7,24 @@
 
 namespace SpecGPS
 {
+	
+struct LLA{
+	float lat;
+	float lng;
+	float alt;
+};
+
+struct ENU{
+	float e;
+	float n;
+	float u;
+};
+
+struct ECEF{
+	float x;
+	float y;
+	float z;
+};
 
 // timer
 const long UpdatePeriod = 100;
@@ -86,6 +104,50 @@ void update() {
 	} else {
 		hasLock = false;
 	}
+}
+
+void lla_to_ecef(LLA& in, ECEF& out) {
+	float a = 6378137.0; //semi major axis of earth in meters
+	float b = 6356752.314245; //semi minor axis of earth in meters
+
+	float N_phi = (pow(a, 2)) / sqrt(pow(a, 2)*pow(cos(in.lat), 2) + pow(b, 2)*pow(sin(in.lat), 2));
+
+	out.x = (N_phi + in.alt)*cos(in.lat)*cos(in.lng);
+	out.y = (N_phi + in.alt)*cos(in.lat)*sin(in.lng);
+	out.z = ((pow(b, 2) / pow(a, 2))*N_phi + in.alt)*sin(in.lat);
+}
+
+void ecef_to_enu(LLA lla_ref, ECEF ecef_ref, ECEF ecef_data, ENU& out) {
+	float matrix_a[3][3] = {
+		{ -sin(lla_ref.lng), cos(lla_ref.lng), 0 },
+		{ -sin(lla_ref.lat)*cos(lla_ref.lng), -sin(lla_ref.lat)*sin(lla_ref.lng), cos(lla_ref.lat) },
+		{ cos(lla_ref.lat)*cos(lla_ref.lng), cos(lla_ref.lat)*sin(lla_ref.lng), sin(lla_ref.lat) }
+	};
+
+	float delta_x = ecef_data.x - ecef_ref.x;
+	float delta_y = ecef_data.y - ecef_ref.y;
+	float delta_z = ecef_data.z - ecef_ref.z;
+
+	float delta_vec[3] = { delta_x , delta_y , delta_z };
+
+	int i, j;
+	float tempEnu[3];
+	for (i = 0; i < 3; i++) {
+		tempEnu[i] = 0;
+		for (j = 0; j < 3; j++) {
+			tempEnu[i] += matrix_a[i][j] * delta_vec[j];
+		}
+	}
+	
+	out.e = tempEnu[0];
+	out.n = tempEnu[1];
+	out.u = tempEnu[2];
+}
+
+void lla_to_enu(LLA& in, LLA lla_ref, ECEF ecef_ref, ENU& out){
+	ECEF temp;
+	lla_to_ecef(in,temp);
+	ecef_to_enu(lla_ref, ecef_ref, temp, out);
 }
 
 };
