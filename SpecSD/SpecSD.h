@@ -8,50 +8,39 @@
 namespace SpecSD{
 
     unsigned long UpdateTimer = 0;
-    const unsigned long UpdatePeriod = 1;
+    const unsigned long UpdatePeriod = 10;
     String fileName;
     File dataFile;
 
-    void setup(String theFileName = "telemetryFile1") {
-        fileName = theFileName;
+    void setup(String theFileName) {
         // PB12 is needed as a CS pin. We shouldn't need to use it in hardware, but it's needed for the lib
         if(!SD.begin(PB12)){
             Serial.println("SD begin failed!");
         }else{
-            Serial.println("SD begin pass");
+            //Serial.println("SD begin pass");
         }
-    }
-	
-	void writeTelemetry(float data, int digits) {
-		dataFile = SD.open(fileName, FILE_WRITE);
-        
-        if(dataFile){
-            // Serial.print("writing to sd: ");
-            // Serial.println(data);
-            dataFile.print(data, digits);
-			dataFile.print(" ");
-            dataFile.close();
-        }
-	}
-	
-	void writeTelemetry(int data) {
-		dataFile = SD.open(fileName, FILE_WRITE);
-        
-        if(dataFile){
-            // Serial.print("writing to sd: ");
-            // Serial.println(data);
-            dataFile.print(data);
-			dataFile.print(" ");
-            dataFile.close();
-        }
+		
+		File indexFile;
+		indexFile = SD.open((theFileName + ".txt"), FILE_READ);
+		int currentIndex = 0;
+		while (indexFile.available()) {
+			currentIndex = ((int)indexFile.read());
+		}
+		indexFile.close();
+		
+		// open file and write new index
+		indexFile = SD.open((theFileName + ".txt"), FILE_WRITE);
+		indexFile.write(++currentIndex);
+		indexFile.close();
+		
+		fileName = theFileName + String(currentIndex) + ".txt";
+
 	}
 
     void writeTelemetry(String data) {
         dataFile = SD.open(fileName, FILE_WRITE);
-        
+        //Serial.println(fileName);
         if(dataFile){
-            // Serial.print("writing to sd: ");
-            // Serial.println(data);
             dataFile.print(data);
 			dataFile.print(" ");
             dataFile.close();

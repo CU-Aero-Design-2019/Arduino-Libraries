@@ -13,7 +13,8 @@ namespace SpecHMC5883{
     const long UpdatePeriod = 100;
     unsigned long UpdateTimer = 0;
 
-    int16_t x, y, z, t;
+    int16_t x, y, z;
+	float heading;
 
     void setup(){
         Wire.begin();
@@ -31,7 +32,6 @@ namespace SpecHMC5883{
         Wire.write(0x03); //select register 3, X MSB register
         Wire.endTransmission(false);
         
-        
         //Read data from each axis, 2 registers per axis
         Wire.requestFrom(address, 6);
         if(6<=Wire.available()){
@@ -41,6 +41,11 @@ namespace SpecHMC5883{
             z |= Wire.read(); //Z lsb
             y = Wire.read()<<8; //Y msb
             y |= Wire.read(); //Y lsb
+			heading = atan2(x, y) / 0.0174532925;
+			if (heading < 0) {
+				heading += 360;
+			}
+			heading = 360 - heading; // N=0/360, E=90, S=180, W=270
         }
     }
 

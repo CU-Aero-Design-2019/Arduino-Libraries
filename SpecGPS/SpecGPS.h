@@ -12,6 +12,8 @@ namespace SpecGPS
 const long UpdatePeriod = 100;
 unsigned long UpdateTimer = 0;
 
+bool hasLock = false;
+
 // The TinyGPS++ object
 TinyGPSPlus gps;
 
@@ -76,9 +78,13 @@ void displayInfo()
 }
 
 void update() {
-	// This sketch displays information every time a new sentence is correctly encoded.
 	while (GPSSerial.available() > 0){
 		gps.encode(GPSSerial.read());
+	}
+	if (gps.location.age() < 1000) {
+		hasLock = true;
+	} else {
+		hasLock = false;
 	}
 }
 

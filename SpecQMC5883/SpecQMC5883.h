@@ -7,7 +7,7 @@
 #include <Wire.h>
 #include <QMC5883L.h>
 
-namespace SpecHMC5883{
+namespace SpecQMC5883{
         
     const int address = 0x0D;
 
