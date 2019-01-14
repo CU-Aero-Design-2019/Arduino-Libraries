@@ -36,6 +36,8 @@
 #define BMP085_READTEMPCMD          0x2E
 #define BMP085_READPRESSURECMD            0x34
 
+#define NUMBEROFSAMPLES 10
+
 class SpecBMP180
 {
     public:
@@ -44,6 +46,7 @@ class SpecBMP180
         float readTemperature(void);
         int32_t readPressure(void);
         int32_t readSealevelPressure(float altitude_meters = 0);
+		float readAvgOffsetAltitude(float sealevelPressure = 101325);
         float readAltitude(float sealevelPressure = 101325); // std atmosphere
         float readOffsetAltitude(float sealevelPressure = 101325);
         uint16_t readRawTemperature(void);
@@ -62,9 +65,8 @@ class SpecBMP180
         uint16_t read16(uint8_t addr);
         void write8(uint8_t addr, uint8_t data);
 		
-		const uint8_t numberOfSamples = 10;
 		uint32_t currentSample = 0;
-		float samples[numberOfSamples];
+		float samples[NUMBEROFSAMPLES];
 
     uint8_t oversampling;
 
