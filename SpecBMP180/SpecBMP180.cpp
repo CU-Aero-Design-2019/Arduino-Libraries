@@ -263,6 +263,20 @@ float SpecBMP180::readOffsetAltitude(float sealevelPressure){
     return (readAltitude(sealevelPressure) - baselineAlt);
 }
 
+float SpecBMP180::readAvgOffsetAltitude(float sealevelPressure){
+    float sum = 0;
+	uint8_t  count = 0;
+	samples[currentSample % numberOfSamples] = readAltitude(sealevelPressure) - baselineAlt;
+	for(int i = 0; i < numberOfSamples; i++){
+		if(i <= currentSample){
+			sum += samples[i];
+			count ++;
+		}
+	}
+	return sum/count;
+	
+}
+
 /*********************************************************************/
 
 uint8_t SpecBMP180::read8(uint8_t a)
