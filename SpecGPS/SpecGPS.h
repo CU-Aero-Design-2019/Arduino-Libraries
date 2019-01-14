@@ -38,6 +38,18 @@ TinyGPSPlus gps;
 void setup()
 {
 	GPSSerial.begin(GPSSerialBaudrate);
+	
+	// tell the GPS to update at 10Hz
+	// to get the correct message, copy the hex part from u-center's hex view in the message view window.
+	uint8_t setupGPS1[] = {0xB5, 0x62, 0x06, 0x08, 0x06, 0x00, 0x64};
+	uint8_t setupGPS2[] = {0x00, 0x01, 0x00, 0x01, 0x00, 0x7A, 0x12};
+	
+	// 1Hz alternative
+	// uint8_t setupGPS1[] = {0xB5, 0x62, 0x06, 0x08, 0x06, 0x00, 0xE8};
+	// uint8_t setupGPS2[] = {0x03, 0x01, 0x00, 0x01, 0x00, 0x01, 0x39};
+	
+	GPSSerial.write(setupGPS1, sizeof(setupGPS1));
+	GPSSerial.write(setupGPS2, sizeof(setupGPS1));
 }
 
 void displayInfo()
