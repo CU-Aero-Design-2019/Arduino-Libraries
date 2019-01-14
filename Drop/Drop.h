@@ -72,6 +72,13 @@ namespace Drop {
 			}
 		}
 		
+		Serial.print("W " + String(dropWater) + ", ");
+		Serial.print("H " + String(dropHabs) + ", ");
+		Serial.print("G1 " + String(dropGlider1) + ", ");
+		Serial.print("G2 " + String(dropGlider2) + ", ");
+		Serial.print("Arm " + String(dropArmed) + ", ");
+		Serial.print("Auto " + String(autoDrop) + ", ");
+		Serial.print("Tar " + String(collectTarget) + "\n");
 	}
 
 }

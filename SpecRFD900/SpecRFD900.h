@@ -27,7 +27,7 @@ namespace SpecRFD900 {
 		if (in ^ 0b10000000) {
 			Drop::collectTarget = true;
 		} else {
-			Drop::collectTarget = false;
+			//Drop::collectTarget = false;
 		}
 		
 		if (in ^ 0b00100000) {
