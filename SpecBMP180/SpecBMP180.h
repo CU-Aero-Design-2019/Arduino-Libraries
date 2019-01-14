@@ -65,8 +65,9 @@ class SpecBMP180
         uint16_t read16(uint8_t addr);
         void write8(uint8_t addr, uint8_t data);
 		
-		uint32_t currentSample = 0;
+		uint8_t currentSample = 0;
 		float samples[NUMBEROFSAMPLES];
+		float avgSum = 0;
 
     uint8_t oversampling;
 
