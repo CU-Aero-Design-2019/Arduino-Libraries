@@ -65,6 +65,7 @@ namespace SpecRFD900 {
 		} else {
 			Drop::dropWater = false;
 		}
+		Drop::update();
 	}
 	
 	// to be called at a regular interval

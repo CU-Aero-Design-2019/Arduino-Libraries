@@ -4,7 +4,7 @@ SpecBMP180::SpecBMP180()
 {
 }
 
-boolean SpecBMP180::begin(uint8_t mode)
+boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode)
 {
     if (mode > BMP085_ULTRAHIGHRES)
         mode = BMP085_ULTRAHIGHRES;
@@ -56,11 +56,11 @@ boolean SpecBMP180::begin(uint8_t mode)
     Serial.println(md, DEC);
 #endif
 
-    for(int i = 0; i < 100; i++){
+    for(int i = 0; i < nInitSamples; i++){
         this->baselineAlt += this->readAltitude();
         delay(1);
     }
-    this->baselineAlt /= 100;
+    this->baselineAlt /= nInitSamples;
 
     return true;
 }

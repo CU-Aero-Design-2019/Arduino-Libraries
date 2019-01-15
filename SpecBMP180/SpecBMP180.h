@@ -42,7 +42,7 @@ class SpecBMP180
 {
     public:
         SpecBMP180();
-        boolean begin(uint8_t mode = BMP085_ULTRAHIGHRES); // by default go highres
+        boolean begin(uint8_t nInitSamples = 100, uint8_t mode = BMP085_ULTRAHIGHRES); // by default go highres
         float readTemperature(void);
         int32_t readPressure(void);
         int32_t readSealevelPressure(float altitude_meters = 0);
