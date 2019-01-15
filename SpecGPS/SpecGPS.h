@@ -32,6 +32,8 @@ unsigned long UpdateTimer = 0;
 
 bool hasLock = false;
 
+const float deg_to_rad = 0.01745329251;
+
 // The TinyGPS++ object
 TinyGPSPlus gps;
 
@@ -119,21 +121,22 @@ void update() {
 }
 
 void lla_to_ecef(LLA& in, ECEF& out) {
-	float a = 6378137.0; //semi major axis of earth in meters
-	float b = 6356752.314245; //semi minor axis of earth in meters
+	const int a = 6378137; //semi major axis of earth in meters
+	const float b = 6356752.314245; //semi minor axis of earth in meters
+	const float e_sqrd = 0.0066943799902;
+	
+	float N_phi = a/ sqrt(1 - (e_sqrd*pow(sin(in.lat * deg_to_rad),2)));
 
-	float N_phi = (pow(a, 2)) / sqrt(pow(a, 2)*pow(cos(in.lat), 2) + pow(b, 2)*pow(sin(in.lat), 2));
-
-	out.x = (N_phi + in.alt)*cos(in.lat)*cos(in.lng);
-	out.y = (N_phi + in.alt)*cos(in.lat)*sin(in.lng);
-	out.z = ((pow(b, 2) / pow(a, 2))*N_phi + in.alt)*sin(in.lat);
+	out.x = (N_phi + in.alt)*cos(in.lat * deg_to_rad)*cos(in.lng * deg_to_rad);
+	out.y = (N_phi + in.alt)*cos(in.lat * deg_to_rad)*sin(in.lng * deg_to_rad);
+	out.z = ((N_phi*(1-e_sqrd))+in.alt) * sin(in.lat * deg_to_rad);
 }
 
 void ecef_to_enu(LLA lla_ref, ECEF ecef_ref, ECEF ecef_data, ENU& out) {
 	float matrix_a[3][3] = {
-		{ -sin(lla_ref.lng), cos(lla_ref.lng), 0 },
-		{ -sin(lla_ref.lat)*cos(lla_ref.lng), -sin(lla_ref.lat)*sin(lla_ref.lng), cos(lla_ref.lat) },
-		{ cos(lla_ref.lat)*cos(lla_ref.lng), cos(lla_ref.lat)*sin(lla_ref.lng), sin(lla_ref.lat) }
+		{ -sin(lla_ref.lng * deg_to_rad), cos(lla_ref.lng * deg_to_rad), 0 },
+		{ -sin(lla_ref.lat * deg_to_rad)*cos(lla_ref.lng * deg_to_rad), -sin(lla_ref.lat * deg_to_rad)*sin(lla_ref.lng * deg_to_rad), cos(lla_ref.lat * deg_to_rad) },
+		{ cos(lla_ref.lat * deg_to_rad)*cos(lla_ref.lng * deg_to_rad), cos(lla_ref.lat * deg_to_rad)*sin(lla_ref.lng * deg_to_rad), sin(lla_ref.lat * deg_to_rad) }
 	};
 
 	float delta_x = ecef_data.x - ecef_ref.x;
