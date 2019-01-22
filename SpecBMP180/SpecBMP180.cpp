@@ -1,7 +1,18 @@
 #include "SpecBMP180.h"
 
-SpecBMP180::SpecBMP180()
-{
+SpecBMP180::SpecBMP180() : altFilter(1, 1, 0.01) {
+
+}
+
+// updates kalman filter?
+void SpecBMP180::update() {
+	float alt = readOffsetAltitude();
+	filteredAlt = altFilter.updateEstimate(alt);
+}
+
+// returns altitude after kalman filter
+float SpecBMP180::getKAlt() {
+	return filteredAlt;
 }
 
 boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode)

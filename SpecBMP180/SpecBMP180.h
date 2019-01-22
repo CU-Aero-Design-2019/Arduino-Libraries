@@ -10,6 +10,8 @@
 #endif
 #include "Wire.h"
 
+#include <SimpleKalmanFilter.h>
+
 #define BMP085_DEBUG 0
 
 #define BMP085_I2CADDR 0x77
@@ -42,6 +44,8 @@ class SpecBMP180
 {
     public:
         SpecBMP180();
+		void update();
+		float getKAlt();
         boolean begin(uint8_t nInitSamples = 100, uint8_t mode = BMP085_ULTRAHIGHRES); // by default go highres
         float readTemperature(void);
         int32_t readPressure(void);
@@ -68,6 +72,9 @@ class SpecBMP180
 		uint8_t currentSample = 0;
 		float samples[NUMBEROFSAMPLES];
 		float avgSum = 0;
+		SimpleKalmanFilter altFilter;
+		
+		float filteredAlt;
 
     uint8_t oversampling;
 

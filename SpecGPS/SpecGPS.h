@@ -30,6 +30,8 @@ struct ECEF{
 const long UpdatePeriod = 100;
 unsigned long UpdateTimer = 0;
 
+const int GPSSerialBaudrate = 9600;
+
 bool hasLock = false;
 
 const float deg_to_rad = 0.01745329251;
@@ -56,8 +58,6 @@ void setup()
 		GPSSerial.write(setupGPS3, sizeof(setupGPS3));
 		GPSSerial.write(setupGPS4, sizeof(setupGPS4));
 	#endif
-	
-	
 	
 	GPSSerial.write(setupGPS1, sizeof(setupGPS1));
 	GPSSerial.write(setupGPS2, sizeof(setupGPS1));
@@ -170,7 +170,7 @@ void ecef_to_enu(LLA lla_ref, ECEF ecef_ref, ECEF ecef_data, ENU& out) {
 
 void lla_to_enu(LLA& in, LLA lla_ref, ECEF ecef_ref, ENU& out){
 	ECEF temp;
-	lla_to_ecef(in,temp);
+	lla_to_ecef(in, temp);
 	ecef_to_enu(lla_ref, ecef_ref, temp, out);
 }
 

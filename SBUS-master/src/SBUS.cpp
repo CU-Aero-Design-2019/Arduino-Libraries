@@ -32,7 +32,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 	void sendByte();
 #endif
 /* SBUS object, input the serial bus */
-SBUS::SBUS(HardwareSerial& bus)
+SBUS::SBUS(SoftwareSerial bus)
 {
 	_bus = &bus;
 }
@@ -78,31 +78,31 @@ bool SBUS::read(uint16_t* channels, bool* failsafe, bool* lostFrame)
 			channels[5]  = (uint16_t) ((_payload[6]>>7 |_payload[7] <<1 |_payload[8]<<9)   	 & 0x07FF);
 			channels[6]  = (uint16_t) ((_payload[8]>>2 |_payload[9] <<6)                     & 0x07FF);
 			channels[7]  = (uint16_t) ((_payload[9]>>5 |_payload[10]<<3)                     & 0x07FF);
-			// channels[8]  = (uint16_t) ((_payload[11]   |_payload[12]<<8)                     & 0x07FF);
-			// channels[9]  = (uint16_t) ((_payload[12]>>3|_payload[13]<<5)                     & 0x07FF);
-			// channels[10] = (uint16_t) ((_payload[13]>>6|_payload[14]<<2 |_payload[15]<<10) 	 & 0x07FF);
-			// channels[11] = (uint16_t) ((_payload[15]>>1|_payload[16]<<7)                     & 0x07FF);
-			// channels[12] = (uint16_t) ((_payload[16]>>4|_payload[17]<<4)                     & 0x07FF);
-			// channels[13] = (uint16_t) ((_payload[17]>>7|_payload[18]<<1 |_payload[19]<<9)  	 & 0x07FF);
-			// channels[14] = (uint16_t) ((_payload[19]>>2|_payload[20]<<6)                     & 0x07FF);
-			// channels[15] = (uint16_t) ((_payload[20]>>5|_payload[21]<<3)                     & 0x07FF);
+			channels[8]  = (uint16_t) ((_payload[11]   |_payload[12]<<8)                     & 0x07FF);
+			channels[9]  = (uint16_t) ((_payload[12]>>3|_payload[13]<<5)                     & 0x07FF);
+			channels[10] = (uint16_t) ((_payload[13]>>6|_payload[14]<<2 |_payload[15]<<10) 	 & 0x07FF);
+			channels[11] = (uint16_t) ((_payload[15]>>1|_payload[16]<<7)                     & 0x07FF);
+			channels[12] = (uint16_t) ((_payload[16]>>4|_payload[17]<<4)                     & 0x07FF);
+			channels[13] = (uint16_t) ((_payload[17]>>7|_payload[18]<<1 |_payload[19]<<9)  	 & 0x07FF);
+			channels[14] = (uint16_t) ((_payload[19]>>2|_payload[20]<<6)                     & 0x07FF);
+			channels[15] = (uint16_t) ((_payload[20]>>5|_payload[21]<<3)                     & 0x07FF);
 		}
 		if (lostFrame) {
-			// count lost frames
-			if (_payload[22] & _sbusLostFrame) {
-			*lostFrame = true;
-			} else {
-					*lostFrame = false;
-				}
+    	// count lost frames
+    	if (_payload[22] & _sbusLostFrame) {
+      	*lostFrame = true;
+    	} else {
+				*lostFrame = false;
 			}
-			if (failsafe) {
-			// failsafe state
-			if (_payload[22] & _sbusFailSafe) {
-				*failsafe = true;
-			}
-			else{
-				*failsafe = false;
-			}
+		}
+		if (failsafe) {
+    	// failsafe state
+    	if (_payload[22] & _sbusFailSafe) {
+      		*failsafe = true;
+    	}
+    	else{
+      		*failsafe = false;
+    	}
 		}
 		// return true on receiving a full packet
 		return true;
@@ -131,6 +131,72 @@ bool SBUS::readCal(float* calChannels, bool* failsafe, bool* lostFrame)
 		// return false if a full packet is not received
 		return false;
   }
+}
+
+/* write SBUS packets */
+void SBUS::write(uint16_t* channels)
+{
+	static uint8_t packet[25];
+	/* assemble the SBUS packet */
+	// SBUS header
+	packet[0] = _sbusHeader;
+	// 16 channels of 11 bit data
+	if (channels) {
+		packet[1] = (uint8_t) ((channels[0] & 0x07FF));
+		packet[2] = (uint8_t) ((channels[0] & 0x07FF)>>8 | (channels[1] & 0x07FF)<<3);
+		packet[3] = (uint8_t) ((channels[1] & 0x07FF)>>5 | (channels[2] & 0x07FF)<<6);
+		packet[4] = (uint8_t) ((channels[2] & 0x07FF)>>2);
+		packet[5] = (uint8_t) ((channels[2] & 0x07FF)>>10 | (channels[3] & 0x07FF)<<1);
+		packet[6] = (uint8_t) ((channels[3] & 0x07FF)>>7 | (channels[4] & 0x07FF)<<4);
+		packet[7] = (uint8_t) ((channels[4] & 0x07FF)>>4 | (channels[5] & 0x07FF)<<7);
+		packet[8] = (uint8_t) ((channels[5] & 0x07FF)>>1);
+		packet[9] = (uint8_t) ((channels[5] & 0x07FF)>>9 | (channels[6] & 0x07FF)<<2);
+		packet[10] = (uint8_t) ((channels[6] & 0x07FF)>>6 | (channels[7] & 0x07FF)<<5);
+		packet[11] = (uint8_t) ((channels[7] & 0x07FF)>>3);
+		packet[12] = (uint8_t) ((channels[8] & 0x07FF));
+		packet[13] = (uint8_t) ((channels[8] & 0x07FF)>>8 | (channels[9] & 0x07FF)<<3);
+		packet[14] = (uint8_t) ((channels[9] & 0x07FF)>>5 | (channels[10] & 0x07FF)<<6);
+		packet[15] = (uint8_t) ((channels[10] & 0x07FF)>>2);
+		packet[16] = (uint8_t) ((channels[10] & 0x07FF)>>10 | (channels[11] & 0x07FF)<<1);
+		packet[17] = (uint8_t) ((channels[11] & 0x07FF)>>7 | (channels[12] & 0x07FF)<<4);
+		packet[18] = (uint8_t) ((channels[12] & 0x07FF)>>4 | (channels[13] & 0x07FF)<<7);
+		packet[19] = (uint8_t) ((channels[13] & 0x07FF)>>1);
+		packet[20] = (uint8_t) ((channels[13] & 0x07FF)>>9 | (channels[14] & 0x07FF)<<2);
+		packet[21] = (uint8_t) ((channels[14] & 0x07FF)>>6 | (channels[15] & 0x07FF)<<5);
+		packet[22] = (uint8_t) ((channels[15] & 0x07FF)>>3);
+	}
+	// flags
+	packet[23] = 0x00;
+	// footer
+	packet[24] = _sbusFooter;
+	#if defined(__MK20DX128__) || defined(__MK20DX256__) // Teensy 3.0 || Teensy 3.1/3.2
+		// use ISR to send byte at a time,
+		// 130 us between bytes to emulate 2 stop bits
+		noInterrupts();
+		memcpy(&PACKET,&packet,sizeof(packet));
+		interrupts();
+		serialTimer.priority(255);
+		serialTimer.begin(sendByte,130);
+	#elif defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(STM32L496xx) || defined(STM32L476xx) || defined(STM32L433xx) || defined(STM32L432xx) || defined(_BOARD_MAPLE_MINI_H_)  // Teensy 3.5 || Teensy 3.6 || Teensy LC || STM32L4 || Maple Mini
+		// write packet
+		_bus->write(packet,25);
+	#endif
+}
+
+/* write SBUS packets from calibrated inputs */
+void SBUS::writeCal(float* calChannels)
+{
+	uint16_t channels[_numChannels] = {0};
+	// linear calibration
+	if (calChannels) {
+		for (uint8_t i = 0; i < _numChannels; i++) {
+			if (_useWriteCoeff[i]) {
+				calChannels[i] = PolyVal(_writeLen[i],_writeCoeff[i],calChannels[i]);
+			}
+			channels[i] = (calChannels[i] - _sbusBias[i])  / _sbusScale[i];
+		}
+	}
+	write(channels);
 }
 
 void SBUS::setEndPoints(uint8_t channel,uint16_t min,uint16_t max)
@@ -173,6 +239,35 @@ void SBUS::getReadCal(uint8_t channel,float *coeff,uint8_t len)
 	if (coeff) {
 		for (uint8_t i = 0; (i < _readLen[channel]) && (i < len); i++) {
 			coeff[i] = _readCoeff[channel][i];
+		}
+	}
+}
+
+void SBUS::setWriteCal(uint8_t channel,float *coeff,uint8_t len)
+{
+	if (coeff) {
+		if (!_writeCoeff) {
+			_writeCoeff = (float**) malloc(sizeof(float*)*_numChannels);
+		}
+		if (!_writeCoeff[channel]) {
+			_writeCoeff[channel] = (float*) malloc(sizeof(float)*len);
+		} else {
+			free(_writeCoeff[channel]);
+			_writeCoeff[channel] = (float*) malloc(sizeof(float)*len);
+		}
+		for (uint8_t i = 0; i < len; i++) {
+			_writeCoeff[channel][i] = coeff[i];
+		}
+		_writeLen[channel] = len;
+		_useWriteCoeff[channel] = true;
+	}
+}
+
+void SBUS::getWriteCal(uint8_t channel,float *coeff,uint8_t len)
+{
+	if (coeff) {
+		for (uint8_t i = 0; (i < _writeLen[channel]) && (i < len); i++) {
+			coeff[i] = _writeCoeff[channel][i];
 		}
 	}
 }
