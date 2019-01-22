@@ -51,71 +51,16 @@ void setup()
 	// uint8_t setupGPS1[] = {0xB5, 0x62, 0x06, 0x08, 0x06, 0x00, 0xE8};
 	// uint8_t setupGPS2[] = {0x03, 0x01, 0x00, 0x01, 0x00, 0x01, 0x39};
 	
-	#ifdef GLIDER
+	//#ifdef GLIDER
 		// Disable all but GPS and GLONASS
 		uint8_t setupGPS3[] = {0xB5, 0x62, 0x06, 0x3E, 0x24, 0x00, 0x00, 0x00, 0x20, 0x04, 0x00, 0x08, 0x10, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x01, 0x03, 0x00};
 		uint8_t setupGPS4[] = {0x00, 0x00, 0x01, 0x01, 0x05, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, 0x01, 0x06, 0x08, 0x0E, 0x00, 0x01, 0x00, 0x01, 0x01, 0xD7, 0x89};
 		GPSSerial.write(setupGPS3, sizeof(setupGPS3));
 		GPSSerial.write(setupGPS4, sizeof(setupGPS4));
-	#endif
+	//#endif
 	
 	GPSSerial.write(setupGPS1, sizeof(setupGPS1));
 	GPSSerial.write(setupGPS2, sizeof(setupGPS1));
-}
-
-void displayInfo()
-{
-	Serial.print(F("Location: "));
-	if (gps.location.isValid())
-	{
-		Serial.print(gps.location.lat(), 6);
-		Serial.print(F(","));
-		Serial.print(gps.location.lng(), 6);
-	}
-	else
-	{
-		Serial.print(F("INVALID"));
-	}
-
-	Serial.print(F("  Date/Time: "));
-	if (gps.date.isValid())
-	{
-		Serial.print(gps.date.month());
-		Serial.print(F("/"));
-		Serial.print(gps.date.day());
-		Serial.print(F("/"));
-		Serial.print(gps.date.year());
-	}
-	else
-	{
-		Serial.print(F("INVALID"));
-	}
-
-	Serial.print(F(" "));
-	if (gps.time.isValid())
-	{
-		if (gps.time.hour() < 10)
-			Serial.print(F("0"));
-		Serial.print(gps.time.hour());
-		Serial.print(F(":"));
-		if (gps.time.minute() < 10)
-			Serial.print(F("0"));
-		Serial.print(gps.time.minute());
-		Serial.print(F(":"));
-		if (gps.time.second() < 10)
-			Serial.print(F("0"));
-		Serial.print(gps.time.second());
-		Serial.print(F("."));
-		if (gps.time.centisecond() < 10)
-			Serial.print(F("0"));
-		Serial.print(gps.time.centisecond());
-	}
-	else
-	{
-		Serial.print(F("INVALID"));
-	}
-
-	Serial.println();
 }
 
 void update() {
