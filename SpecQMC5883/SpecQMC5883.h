@@ -17,6 +17,9 @@ namespace SpecQMC5883{
     int16_t x, y, z, t;
 
     int heading;
+	int headingFiltered;
+	
+	SimpleKalmanFilter filter(2,2,0.01);
 
     // void setup(){
     //     Wire.begin();
@@ -51,18 +54,24 @@ namespace SpecQMC5883{
     QMC5883L compass;
 
     void setup(){
-        // while(!compass.begin()) {
-        //     Serial.println("No compass found!");
-        //     delay(500);
-        // }
         compass.init();
     }
 
     void update(){
         // data = compass.readRaw();
-        compass.readRaw(&x, &y, &z, &t);
-        heading = compass.readHeading();
+		if(compass.ready()){
+			heading = compass.readHeading();
+			headingFiltered = filter.updateEstimate(heading);
+		}
     }
+	
+	int getHeading(){
+		return heading;
+	}
+	
+	int getFilteredHeading(){
+		return headingFiltered;
+	}
 
 };
 
