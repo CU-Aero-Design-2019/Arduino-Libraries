@@ -4,6 +4,7 @@
 #define GPSSerial Serial2
 
 #include <TinyGPS++.h>
+#include <SimpleKalmanFilter.h>
 
 namespace SpecGPS
 {
@@ -35,6 +36,8 @@ const int GPSSerialBaudrate = 9600;
 bool hasLock = false;
 
 const float deg_to_rad = 0.01745329251;
+
+SimpleKalmanFilter bearingFilter(1, 1, 0.01);
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -72,6 +75,25 @@ void update() {
 	} else {
 		hasLock = false;
 	}
+}
+
+float bearing(float lat, float lon, float lat2, float lon2) {
+
+	float teta1 = radians(lat);
+	float teta2 = radians(lat2);
+	float delta1 = radians(lat2-lat);
+	float delta2 = radians(lon2-lon);
+
+	float y = sin(delta2) * cos(teta2);
+	float x = cos(teta1)*sin(teta2) - sin(teta1)*cos(teta2)*cos(delta2);
+	float brng = atan2(y,x);
+	brng = degrees(brng);// radians to degrees
+	
+	while (brng >= 360) {
+		brng -= 360.0;
+	}
+
+	return bearingFilter.updateEstimate(brng);
 }
 
 void lla_to_ecef(LLA& in, ECEF& out) {
