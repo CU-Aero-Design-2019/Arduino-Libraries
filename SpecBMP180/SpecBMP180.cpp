@@ -20,11 +20,19 @@ boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode)
     if (mode > BMP085_ULTRAHIGHRES)
         mode = BMP085_ULTRAHIGHRES;
     oversampling = mode;
+	
+
 
     Wire.begin();
+	
+	
+	Serial.println("there");
 
     if (read8(0xD0) != 0x55)
         return false;
+	
+	
+		Serial.println("here");
 
     /* read calibration data */
     ac1 = read16(BMP085_CAL_AC1);
@@ -33,6 +41,8 @@ boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode)
     ac4 = read16(BMP085_CAL_AC4);
     ac5 = read16(BMP085_CAL_AC5);
     ac6 = read16(BMP085_CAL_AC6);
+	
+	
 
     b1 = read16(BMP085_CAL_B1);
     b2 = read16(BMP085_CAL_B2);
@@ -66,6 +76,8 @@ boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode)
     Serial.print("md = ");
     Serial.println(md, DEC);
 #endif
+
+
 
     for(int i = 0; i < nInitSamples; i++){
         this->baselineAlt += this->readAltitude();
