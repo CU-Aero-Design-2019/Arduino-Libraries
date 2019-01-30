@@ -42,7 +42,7 @@ SimpleKalmanFilter bearingFilter(1, 1, 0.01);
 // The TinyGPS++ object
 TinyGPSPlus gps;
 
-inline void setup()
+void setup()
 {
 	GPSSerial.begin(GPSSerialBaudrate);
 	
@@ -66,7 +66,7 @@ inline void setup()
 	GPSSerial.write(setupGPS2, sizeof(setupGPS1));
 }
 
-inline void update() {
+void update() {
 	while (GPSSerial.available() > 0){
 		gps.encode(GPSSerial.read());
 	}
@@ -77,7 +77,7 @@ inline void update() {
 	}
 }
 
-inline float bearing(float lat, float lon, float lat2, float lon2) {
+float bearing(float lat, float lon, float lat2, float lon2) {
 
 	float teta1 = radians(lat);
 	float teta2 = radians(lat2);
@@ -96,7 +96,7 @@ inline float bearing(float lat, float lon, float lat2, float lon2) {
 	return bearingFilter.updateEstimate(brng);
 }
 
-inline void lla_to_ecef(LLA& in, ECEF& out) {
+void lla_to_ecef(LLA& in, ECEF& out) {
 	const int a = 6378137; //semi major axis of earth in meters
 	const float b = 6356752.314245; //semi minor axis of earth in meters
 	const float e_sqrd = 0.0066943799902;
@@ -108,7 +108,7 @@ inline void lla_to_ecef(LLA& in, ECEF& out) {
 	out.z = ((N_phi*(1-e_sqrd))+in.alt) * sin(in.lat * deg_to_rad);
 }
 
-inline void ecef_to_enu(LLA lla_ref, ECEF ecef_ref, ECEF ecef_data, ENU& out) {
+void ecef_to_enu(LLA lla_ref, ECEF ecef_ref, ECEF ecef_data, ENU& out) {
 	float matrix_a[3][3] = {
 		{ -sin(lla_ref.lng * deg_to_rad), cos(lla_ref.lng * deg_to_rad), 0 },
 		{ -sin(lla_ref.lat * deg_to_rad)*cos(lla_ref.lng * deg_to_rad), -sin(lla_ref.lat * deg_to_rad)*sin(lla_ref.lng * deg_to_rad), cos(lla_ref.lat * deg_to_rad) },
@@ -135,7 +135,7 @@ inline void ecef_to_enu(LLA lla_ref, ECEF ecef_ref, ECEF ecef_data, ENU& out) {
 	out.u = tempEnu[2];
 }
 
-inline void lla_to_enu(LLA& in, LLA lla_ref, ECEF ecef_ref, ENU& out){
+void lla_to_enu(LLA& in, LLA lla_ref, ECEF ecef_ref, ENU& out){
 	ECEF temp;
 	lla_to_ecef(in, temp);
 	ecef_to_enu(lla_ref, ecef_ref, temp, out);
