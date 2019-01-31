@@ -10,7 +10,7 @@
 #endif
 #include "Wire.h"
 
-#include <SimpleKalmanFilter.h>
+//#include <SimpleKalmanFilter.h>
 
 #define BMP085_DEBUG 0
 
@@ -45,8 +45,8 @@ class SpecBMP180
     public:
         SpecBMP180();
 		void update();
-		float getKAlt();
-        boolean begin(uint8_t nInitSamples = 100, uint8_t mode = BMP085_ULTRAHIGHRES); // by default go highres
+		//float getKAlt();
+        bool begin(uint8_t nInitSamples = 100, uint8_t mode = BMP085_ULTRAHIGHRES); // by default go highres
         float readTemperature(void);
         int32_t readPressure(void);
         int32_t readSealevelPressure(float altitude_meters = 0);
@@ -72,9 +72,9 @@ class SpecBMP180
 		uint8_t currentSample = 0;
 		float samples[NUMBEROFSAMPLES];
 		float avgSum = 0;
-		SimpleKalmanFilter altFilter;
+		//SimpleKalmanFilter altFilter;
 		
-		float filteredAlt;
+		//float filteredAlt;
 
     uint8_t oversampling;
 

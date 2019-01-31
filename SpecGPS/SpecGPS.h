@@ -6,8 +6,7 @@
 #include <TinyGPS++.h>
 #include <SimpleKalmanFilter.h>
 
-namespace SpecGPS
-{
+namespace SpecGPS {
 	
 struct LLA{
 	float lat;
@@ -37,7 +36,7 @@ bool hasLock = false;
 
 const float deg_to_rad = 0.01745329251;
 
-SimpleKalmanFilter bearingFilter(1, 1, 0.01);
+//SimpleKalmanFilter bearingFilter(1, 1, 0.01);
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -93,7 +92,7 @@ inline float bearing(float lat, float lon, float lat2, float lon2) {
 		brng -= 360.0;
 	}
 
-	return bearingFilter.updateEstimate(brng);
+	return brng;
 }
 
 inline void lla_to_ecef(LLA& in, ECEF& out) {
