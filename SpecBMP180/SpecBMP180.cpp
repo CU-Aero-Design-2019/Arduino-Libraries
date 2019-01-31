@@ -7,14 +7,14 @@ SpecBMP180::SpecBMP180() {
 
 // updates kalman filter?
 void SpecBMP180::update() {
-	float alt = readOffsetAltitude();
-	//filteredAlt = altFilter.updateEstimate(alt);
+	//float alt = readOffsetAltitude();
+	filteredAlt = altFilter.updateEstimate(alt);
 }
 
 // returns altitude after kalman filter
-// float SpecBMP180::getKAlt() {
-	// return filteredAlt;
-// }
+float SpecBMP180::getKAlt() {
+	return filteredAlt;
+}
 
 boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode) {
     if (mode > BMP085_ULTRAHIGHRES)

@@ -64,7 +64,7 @@ namespace JohnnyKalman {
 	const double x_enu_alpha = 1000;
 	const double y_enu_alpha = 1000;
 	const double z_enu_alpha = 1000;
-	
+	// TODO: Make these bigger ^V
 	const double x_sig_acc = 0.05;
 	const double y_sig_acc = 0.05;
 	const double z_sig_acc = 0.05;
