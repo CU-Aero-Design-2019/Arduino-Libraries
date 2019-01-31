@@ -5,7 +5,7 @@
 #include <SpecGPS.h>
 #include <SpecBMP180.h>
 
-namespace JohnnyKalman{
+namespace JohnnyKalman {
 	
 	const int debugEnabled = 1;
 
@@ -220,7 +220,7 @@ namespace JohnnyKalman{
 	void my_vec_scalar_mult(double *vec_in, double *vec_out, double num_mult, int n_len);
 	void my_vec_copy(double *vec_in, double *vec_out, int n_len);
 	 
-	void initial_kf_setup(){
+	void initial_kf_setup() {
 		hasDoneSetup = true;
 		
 		LLAT_in gps_input;

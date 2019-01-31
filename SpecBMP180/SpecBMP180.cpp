@@ -16,8 +16,7 @@ void SpecBMP180::update() {
 	// return filteredAlt;
 // }
 
-boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode)
-{
+boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode) {
     if (mode > BMP085_ULTRAHIGHRES)
         mode = BMP085_ULTRAHIGHRES;
     oversampling = mode;
@@ -89,15 +88,13 @@ boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode)
     return true;
 }
 
-int32_t SpecBMP180::computeB5(int32_t UT)
-{
+int32_t SpecBMP180::computeB5(int32_t UT) {
     int32_t X1 = (UT - (int32_t)ac6) * ((int32_t)ac5) >> 15;
     int32_t X2 = ((int32_t)mc << 11) / (X1 + (int32_t)md);
     return X1 + X2;
 }
 
-uint16_t SpecBMP180::readRawTemperature(void)
-{
+uint16_t SpecBMP180::readRawTemperature(void) {
     write8(BMP085_CONTROL, BMP085_READTEMPCMD);
     delay(5);
 #if BMP085_DEBUG == 1
@@ -107,8 +104,7 @@ uint16_t SpecBMP180::readRawTemperature(void)
     return read16(BMP085_TEMPDATA);
 }
 
-uint32_t SpecBMP180::readRawPressure(void)
-{
+uint32_t SpecBMP180::readRawPressure(void) {
     uint32_t raw;
 
     write8(BMP085_CONTROL, BMP085_READPRESSURECMD + (oversampling << 6));
@@ -143,8 +139,7 @@ uint32_t SpecBMP180::readRawPressure(void)
     return raw;
 }
 
-int32_t SpecBMP180::readPressure(void)
-{
+int32_t SpecBMP180::readPressure(void) {
     int32_t UT, UP, B3, B5, B6, X1, X2, X3, p;
     uint32_t B4, B7;
 
@@ -214,12 +209,9 @@ int32_t SpecBMP180::readPressure(void)
     Serial.println(B7);
 #endif
 
-    if (B7 < 0x80000000)
-    {
+    if (B7 < 0x80000000) {
         p = (B7 * 2) / B4;
-    }
-    else
-    {
+    } else {
         p = (B7 / B4) * 2;
     }
     X1 = (p >> 8) * (p >> 8);
@@ -243,14 +235,12 @@ int32_t SpecBMP180::readPressure(void)
     return p;
 }
 
-int32_t SpecBMP180::readSealevelPressure(float altitude_meters)
-{
+int32_t SpecBMP180::readSealevelPressure(float altitude_meters) {
     float pressure = readPressure();
     return (int32_t)(pressure / pow(1.0 - altitude_meters / 44330, 5.255));
 }
 
-float SpecBMP180::readTemperature(void)
-{
+float SpecBMP180::readTemperature(void) {
     int32_t UT, B5; // following ds convention
     float temp;
 
@@ -272,8 +262,7 @@ float SpecBMP180::readTemperature(void)
     return temp;
 }
 
-float SpecBMP180::readAltitude(float sealevelPressure)
-{
+float SpecBMP180::readAltitude(float sealevelPressure) {
     float altitude;
 
     float pressure = readPressure();
@@ -283,11 +272,11 @@ float SpecBMP180::readAltitude(float sealevelPressure)
     return altitude;
 }
 
-float SpecBMP180::readOffsetAltitude(float sealevelPressure){
+float SpecBMP180::readOffsetAltitude(float sealevelPressure) {
     return (readAltitude(sealevelPressure) - baselineAlt);
 }
 
-float SpecBMP180::readAvgOffsetAltitude(float sealevelPressure){
+float SpecBMP180::readAvgOffsetAltitude(float sealevelPressure) {
 	avgSum -= samples[currentSample];
 	samples[currentSample] = readAltitude(sealevelPressure) - baselineAlt;
 	avgSum += samples[currentSample];
@@ -297,8 +286,7 @@ float SpecBMP180::readAvgOffsetAltitude(float sealevelPressure){
 
 /*********************************************************************/
 
-uint8_t SpecBMP180::read8(uint8_t a)
-{
+uint8_t SpecBMP180::read8(uint8_t a) {
     uint8_t ret;
 
     Wire.beginTransmission(BMP085_I2CADDR); // start transmission to device
@@ -321,8 +309,7 @@ uint8_t SpecBMP180::read8(uint8_t a)
     return ret;
 }
 
-uint16_t SpecBMP180::read16(uint8_t a)
-{
+uint16_t SpecBMP180::read16(uint8_t a) {
     uint16_t ret;
 
     Wire.beginTransmission(BMP085_I2CADDR); // start transmission to device
@@ -349,8 +336,7 @@ uint16_t SpecBMP180::read16(uint8_t a)
     return ret;
 }
 
-void SpecBMP180::write8(uint8_t a, uint8_t d)
-{
+void SpecBMP180::write8(uint8_t a, uint8_t d) {
     Wire.beginTransmission(BMP085_I2CADDR); // start transmission to device
 #if (ARDUINO >= 100)
     Wire.write(a); // sends register address to read from

@@ -35,13 +35,10 @@ bool hasLock = false;
 
 const float deg_to_rad = 0.01745329251;
 
-//SimpleKalmanFilter bearingFilter(1, 1, 0.01);
-
 // The TinyGPS++ object
 TinyGPSPlus gps;
 
-void setup()
-{
+void setup() {
 	GPSSerial.begin(GPSSerialBaudrate);
 	
 	// tell the GPS to update at 10Hz

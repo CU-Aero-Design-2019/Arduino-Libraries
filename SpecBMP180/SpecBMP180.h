@@ -40,8 +40,7 @@
 
 #define NUMBEROFSAMPLES 10
 
-class SpecBMP180
-{
+class SpecBMP180 {
     public:
         SpecBMP180();
 		void update();
