@@ -20,20 +20,12 @@ boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode) {
     if (mode > BMP085_ULTRAHIGHRES)
         mode = BMP085_ULTRAHIGHRES;
     oversampling = mode;
-	
-
 
     Wire.begin();
-	
-	
-	Serial.println("there");
 
     if (read8(0xD0) != 0x55)
         return false;
 	
-	
-		Serial.println("here");
-
     /* read calibration data */
     ac1 = read16(BMP085_CAL_AC1);
     ac2 = read16(BMP085_CAL_AC2);
