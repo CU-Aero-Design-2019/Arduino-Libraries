@@ -4,7 +4,6 @@
 #define GPSSerial Serial2
 
 #include <TinyGPS++.h>
-#include <SimpleKalmanFilter.h>
 
 namespace SpecGPS {
 	

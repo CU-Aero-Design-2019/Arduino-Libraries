@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <SpecGPS.h>
+#include <SpecBMP180.h>
 
 namespace JohnnyKalman{
 	
@@ -223,12 +224,12 @@ namespace JohnnyKalman{
 		hasDoneSetup = true;
 		
 		LLAT_in gps_input;
-		LLAT_in.lat_in = SpecGPS::gps.location.lat();
-		LLAT_in.lon_in = SpecGPS::gps.location.lng();
-		LLAT_in.alt_in = SpecBMP180::readOffsetAltitude();
-		LLAT_in.minutes = SpecGPS::gps.time.minute();
-		LLAT_in.seconds = SpecGPS::gps.time.second();
-		LLAT_in.centiseconds = 
+		gps_input.lat_in = SpecGPS::gps.location.lat();
+		gps_input.lon_in = SpecGPS::gps.location.lng();
+		gps_input.alt_in = bmp.readOffsetAltitude();
+		gps_input.minutes = SpecGPS::gps.time.minute();
+		gps_input.seconds = SpecGPS::gps.time.second();
+		gps_input.centiseconds = SpecGPS::gps.time.centisecond();
 		
 		if (debugEnabled == 1) {
 			Serial.println("Test: beginning of initial kf setup");
