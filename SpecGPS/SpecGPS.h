@@ -119,6 +119,10 @@ void lla_to_enu(LLA& in, LLA lla_ref, ECEF ecef_ref, ENU& out){
 	ecef_to_enu(lla_ref, ecef_ref, temp, out);
 }
 
+bool equals(LLA a, LLA b){
+	return (a.lat == b.lat && a.lng == b.lng && a.alt == b.alt);
+}
+
 };
 
 #endif
