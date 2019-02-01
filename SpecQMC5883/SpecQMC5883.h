@@ -7,6 +7,9 @@
 #include <Wire.h>
 #include <QMC5883L.h>
 
+#define RAD_TO_DEG 57.2957795131
+#define DEG_TO_RAD 0.0174532925199
+
 namespace SpecQMC5883{
         
     const int address = 0x0D;
@@ -17,10 +20,18 @@ namespace SpecQMC5883{
     int16_t x, y, z, t;
 
     int heading;
-	int headingFiltered;
+	int headingAverage;
 	
-	SimpleKalmanFilter filter(2,2,0.01);
-
+	const int numSamps = 10;
+	
+	float cosines[numSamps];
+	float sines[numSamps];
+	
+	float cosineSum = 0;
+	float sineSum = 0;
+	
+	int sampleCount = 0;
+	
     // void setup(){
     //     Wire.begin();
   
@@ -57,21 +68,41 @@ namespace SpecQMC5883{
         compass.init();
     }
 
+	void updateAverageHeading(){
+		float rad_heading = heading * DEG_TO_RAD;
+		
+		cosineSum -= cosines[sampleCount];
+		sineSum -= sines[sampleCount];
+		
+		cosines[sampleCount] = cos(rad_heading);
+		sines[sampleCount] = sin(rad_heading);
+		
+		cosineSum += cosines[sampleCount];
+		sineSum += sines[sampleCount];
+		
+		float avgCos = cosineSum/numSamps;
+		float avgSin = sineSum/numSamps;
+		
+		float theta = atan(avgSin/avgCos) * RAD_TO_DEG;
+		
+		if(avgCos < 0.0){
+			theta += 180;
+		}else if(avgSin < 0.0){
+			theta +=360;
+		}
+		sampleCount++;
+		sampleCount = sampleCount%numSamps;
+		headingAverage = theta;
+	}
+	
     void update(){
         // data = compass.readRaw();
 		if(compass.ready()){
 			heading = compass.readHeading();
-			headingFiltered = filter.updateEstimate(heading);
+			updateAverageHeading();
 		}
+		
     }
-	
-	int getHeading(){
-		return heading;
-	}
-	
-	int getFilteredHeading(){
-		return headingFiltered;
-	}
 
 };
 

@@ -54,7 +54,9 @@
 /* Apparently M_PI isn't available in all environments. */
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288
-#endif
+#endif 
+
+#define MAG_DECLINATION -6.3 //-6.3 for dayton, +3.3 for fort worth
 
 static void write_register( int addr, int reg, int value )
 {
@@ -202,7 +204,10 @@ int QMC5883L::readHeading()
   float fy = (float)y/(yhigh-ylow);
 
   int heading = 180.0*atan2(fy,fx)/M_PI;
+  heading += 90 + MAG_DECLINATION;
   if(heading<=0) heading += 360;
+  heading = heading % 360;
+  heading = 360 - heading;
   
   return heading;
 }
