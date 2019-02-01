@@ -7,7 +7,8 @@
 
 namespace JohnnyKalman {
 	
-	const int debugEnabled = 1;
+	const int debugEnabled = 0;
+	unsigned long nextTime = 0;
 
 	struct LLAT_in {
 		double lat_in;
@@ -26,6 +27,12 @@ namespace JohnnyKalman {
 		double y_vel;
 		double z_vel;
 	};
+	
+	SpecGPS::LLA lla_ref;
+	SpecGPS::ECEF XYZ_ecef_ref;
+	SpecGPS::ENU xyz_enu_ref;
+	
+	Kalman_out filter_output;
 
 	const double pi = 3.14159265359;
 	const double deg_to_rad = pi / 180;
@@ -57,7 +64,7 @@ namespace JohnnyKalman {
 	const double x_enu_alpha = 1000;
 	const double y_enu_alpha = 1000;
 	const double z_enu_alpha = 1000;
-	
+	// TODO: Make these bigger ^V
 	const double x_sig_acc = 0.05;
 	const double y_sig_acc = 0.05;
 	const double z_sig_acc = 0.05;
@@ -203,7 +210,7 @@ namespace JohnnyKalman {
 	
 	//Kalman Filter
 	void initial_kf_setup();
-	void kalman_update(SpecGPS::LLA ref_pt_lla, LLAT_in gps_input, Kalman_out filter_output);
+	void kalman_update(LLAT_in gps_input, Kalman_out filter_output);
 
 	//Matrix and vector math prototypes here
 	void my_mx_vec_mult(double *mx_in, double *vec_in, double *vec_out, int n_dim);
@@ -220,7 +227,7 @@ namespace JohnnyKalman {
 	void my_vec_scalar_mult(double *vec_in, double *vec_out, double num_mult, int n_len);
 	void my_vec_copy(double *vec_in, double *vec_out, int n_len);
 	 
-	void initial_kf_setup() {
+	void initial_kf_setup(SpecGPS::LLA targetLLA) {
 		hasDoneSetup = true;
 		
 		LLAT_in gps_input;
@@ -282,26 +289,50 @@ namespace JohnnyKalman {
 			Serial.print(" , ");
 			Serial.println(x0_z[1]);
 		}
+		
+		lla_ref = targetLLA;
+		if (debugEnabled) {
+			Serial.print("lla target: ");
+			Serial.print(lla_ref.lat, 8);
+			Serial.print("\t");
+			Serial.print(lla_ref.lng, 8);
+			Serial.print("\t");
+			Serial.print(lla_ref.alt, 1);
+			Serial.print("\t");
+			Serial.print("\n");
+		}
+		SpecGPS::lla_to_ecef(lla_ref, XYZ_ecef_ref);
+		xyz_enu_ref.e = 0;
+		xyz_enu_ref.n = 0;
+		xyz_enu_ref.u = 0;
 
 	}
 
-	void kalman_update(SpecGPS::LLA lla_ref, LLAT_in gps_input, Kalman_out filter_output) {
+	void kalman_update() {
 		
+		// get GPS location and put in struct
 		SpecGPS::LLA lla_coor;
-		SpecGPS::ECEF XYZ_ecef;
-		SpecGPS::ECEF XYZ_ecef_ref;
-		SpecGPS::ENU xyz_enu;
-		SpecGPS::ENU xyz_enu_ref;
+		// lla_coor.lat = SpecGPS::gps.location.lat();
+		// lla_coor.lng = SpecGPS::gps.location.lng();
+		// lla_coor.alt = bmp.readOffsetAltitude();
+		lla_coor.lat = 39.747511;
+		lla_coor.lng = -83.813272;
+		lla_coor.alt = 25;
 		
-		lla_coor.lat = gps_input.lat_in;
-		lla_coor.lng = gps_input.lon_in;
-		lla_coor.alt = gps_input.alt_in;
-
+		SpecGPS::ENU xyz_enu;
 		// Coordinate Transformation
 		SpecGPS::lla_to_enu(lla_coor, lla_ref, XYZ_ecef_ref, xyz_enu); // call this instead of the two functions
 
 		if (debugEnabled) {
-			Serial.print("enu coordinate point: ");
+			Serial.print("enu target: ");
+			Serial.print(xyz_enu_ref.e);
+			Serial.print("\t");
+			Serial.print(xyz_enu_ref.n);
+			Serial.print("\t");
+			Serial.print(xyz_enu_ref.u);
+			Serial.print("\t");
+			Serial.print("\n");
+			Serial.print("enu current location: ");
 			Serial.print(xyz_enu.e);
 			Serial.print("\t");
 			Serial.print(xyz_enu.n);
@@ -312,7 +343,7 @@ namespace JohnnyKalman {
 		}
 
 		// delta time between measurements
-		t_curr = gps_input.minutes * 60 + gps_input.seconds + gps_input.centiseconds / 100;
+		t_curr = ((double)millis())/1000.0;
 		delta_time = t_curr - t_prev;
 		
 		if (debugEnabled) {
@@ -332,18 +363,18 @@ namespace JohnnyKalman {
 		// pre-declared up top with certain indices already assigned values
 		F2[0][1] = delta_time;
 		
-		if (debugEnabled) {
-			Serial.println("F2 initialized");
-		}
+		// if (debugEnabled) {
+			// Serial.println("F2 initialized");
+		// }
 
 		// acceleration control matrix for 2 state
 		// pre-declared up top with certain indices already assigned values
 		B2[0][0] = 0.5 * pow(delta_time, 2);
 		B2[1][1] = delta_time;
 		
-		if (debugEnabled) {
-			Serial.println("B2 initialized");
-		}
+		// if (debugEnabled) {
+			// Serial.println("B2 initialized");
+		// }
 
 		// process noise matrix ... adds to the uncertainty of the prediction
 		// break up for 2 state instead of one large matrix
@@ -368,9 +399,9 @@ namespace JohnnyKalman {
 		Q_sub_z_scalar_temp = 2 * pow(z_sig_acc, 2) * z_enu_alpha;
 		my_scalar_mx_mult(Q_sub_z_in[0], Q_sub_z_out[0], Q_sub_z_scalar_temp, 2);
 
-		if (debugEnabled == 1) {
-			Serial.println("Q subs matrices initialized");
-		}
+		// if (debugEnabled == 1) {
+			// Serial.println("Q subs matrices initialized");
+		// }
 
 		// PREDICTING STAGE
 
@@ -388,9 +419,9 @@ namespace JohnnyKalman {
 		my_mx_vec_mult(B2[0], acc_control_vec_z, xp_z_vec_2, 2);
 		my_vec_add(xp_z_vec_1, xp_z_vec_2, xp_z, 2);
 
-		if (debugEnabled == 1) {
-			Serial.println("xp partials initialized");
-		}
+		// if (debugEnabled == 1) {
+			// Serial.println("xp partials initialized");
+		// }
 
 		// updating the state covariance matrix ... propogating the covariances ahead 
 		// in order to predict ... this gives you the error in the state prediction and estimate
@@ -408,9 +439,9 @@ namespace JohnnyKalman {
 		my_mx_mx_mult(F2_P0z[0], F2_t[0], F2_P0z_F_t[0], 2);
 		my_mx_add(F2_P0z_F_t[0], Q_sub_z_out[0], Pz[0], 2);
 
-		if (debugEnabled == 1) {
-			Serial.println("P subs initialized");
-		}
+		// if (debugEnabled == 1) {
+			// Serial.println("P subs initialized");
+		// }
 
 		// UPDATE STAGE
 
@@ -424,9 +455,9 @@ namespace JohnnyKalman {
 		my_mx_vec_mult(H2[0], xp_z, H2_xp_z, 2);
 		my_vec_subtract(meas_vector_z, H2_xp_z, y_z, 2);
 
-		if (debugEnabled == 1) {
-			Serial.println("y subs 'innovation' initialized");
-		}
+		// if (debugEnabled == 1) {
+			// Serial.println("y subs 'innovation' initialized");
+		// }
 
 		// residual covariance ... "Innovation Covariance"
 		//matrix transpose should be done already ...
@@ -456,9 +487,9 @@ namespace JohnnyKalman {
 		my_mx_2x2_inv(Sz[0], Sz_inv[0]);
 		my_mx_mx_mult(Pz_H2_t[0], Sz_inv[0], Kz[0], 2);
 
-		if (debugEnabled == 1) {
-			Serial.println("K subs initialized");
-		}
+		// if (debugEnabled == 1) {
+			// Serial.println("K subs initialized");
+		// }
 
 		// state update
 		// update state vector
@@ -471,9 +502,9 @@ namespace JohnnyKalman {
 		my_mx_vec_mult(Kz[0], y_z, Kz_y_z, 2);
 		my_vec_add(xp_z, Kz_y_z, x_updated_z, 2);
 
-		if (debugEnabled == 1) {
-			Serial.println("x_updated subs initialized");
-		}
+		// if (debugEnabled == 1) {
+			// Serial.println("x_updated subs initialized");
+		// }
 
 		// updated covariance matrix
 		my_mx_mx_mult(Kx[0], H2[0], Kx_H_2[0], 2);
@@ -488,9 +519,9 @@ namespace JohnnyKalman {
 		my_mx_subtract(eye_2[0], Kz_H_2[0], eye_2_Kz_H2[0], 2);
 		my_mx_mx_mult(eye_2_Kz_H2[0], Pz[0], Pz_updated[0], 2);
 
-		if (debugEnabled == 1) {
-			Serial.println("P_updated subs initialized");
-		}
+		// if (debugEnabled == 1) {
+			// Serial.println("P_updated subs initialized");
+		// }
 
 		// update P0 and x0
 		my_mx_copy(Px_updated[0], P0x[0], 2);
@@ -527,9 +558,10 @@ namespace JohnnyKalman {
 			Serial.print("\n");
 		}
 
-		t_prev = gps_input.minutes * 60 + gps_input.seconds + gps_input.centiseconds / 100;
+		t_prev = ((double)millis())/1000.0;
 		if (debugEnabled == 1) {
 			Serial.println("t_prev: " + String(t_prev));
+			Serial.println();
 		}
 	}
 
