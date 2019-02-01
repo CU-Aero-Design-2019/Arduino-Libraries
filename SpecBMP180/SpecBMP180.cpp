@@ -1,13 +1,13 @@
 #include "SpecBMP180.h"
 
-//SpecBMP180::SpecBMP180() : altFilter(1, 1, 0.01) {
-SpecBMP180::SpecBMP180() {
+SpecBMP180::SpecBMP180() : altFilter(1, 1, 0.01) {
+//SpecBMP180::SpecBMP180() {
 
 }
 
 // updates kalman filter?
 void SpecBMP180::update() {
-	//float alt = readOffsetAltitude();
+	float alt = readOffsetAltitude();
 	filteredAlt = altFilter.updateEstimate(alt);
 }
 
