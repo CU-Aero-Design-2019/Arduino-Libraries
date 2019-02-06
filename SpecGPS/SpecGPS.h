@@ -72,7 +72,7 @@ void update() {
 	}
 }
 
-float bearing(float lat, float lon, float lat2, float lon2) {
+int bearing(float lat, float lon, float lat2, float lon2) {
 
 	float teta1 = radians(lat);
 	float teta2 = radians(lat2);
@@ -88,7 +88,7 @@ float bearing(float lat, float lon, float lat2, float lon2) {
 		brng -= 360.0;
 	}
 
-	return brng;
+	return round(brng);
 }
 
 void lla_to_ecef(LLA& in, ECEF& out) {

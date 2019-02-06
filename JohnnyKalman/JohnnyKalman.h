@@ -312,12 +312,12 @@ namespace JohnnyKalman {
 		
 		// get GPS location and put in struct
 		SpecGPS::LLA lla_coor;
-		// lla_coor.lat = SpecGPS::gps.location.lat();
-		// lla_coor.lng = SpecGPS::gps.location.lng();
-		// lla_coor.alt = bmp.readOffsetAltitude();
-		lla_coor.lat = 39.747511;
-		lla_coor.lng = -83.813272;
-		lla_coor.alt = 25;
+		lla_coor.lat = SpecGPS::gps.location.lat();
+		lla_coor.lng = SpecGPS::gps.location.lng();
+		lla_coor.alt = bmp.readOffsetAltitude();
+		// lla_coor.lat = 39.747511;
+		// lla_coor.lng = -83.813272;
+		// lla_coor.alt = 25;
 		
 		SpecGPS::ENU xyz_enu;
 		// Coordinate Transformation
