@@ -33,6 +33,8 @@ const int GPSSerialBaudrate = 9600;
 
 bool hasLock = false;
 
+float baselineAlt = 0;
+
 const float deg_to_rad = 0.01745329251;
 
 // The TinyGPS++ object
@@ -65,11 +67,22 @@ void update() {
 	while (GPSSerial.available() > 0){
 		gps.encode(GPSSerial.read());
 	}
-	if (gps.location.age() < 1000) {
+	if (gps.location.isValid() && gps.location.age() < 1000) {
 		hasLock = true;
 	} else {
 		hasLock = false;
 	}
+	#ifndef HASBMP
+	if (baselineAlt < 1 && gps.satellites.value() > 6) {
+		Serial.println("Setting baseline alt");
+		baselineAlt = gps.altitude.meters();
+	}
+	#endif
+}
+
+float getOffsetAlt() {
+	Serial.println("returning alt");
+	return gps.altitude.meters() - baselineAlt;
 }
 
 int bearing(float lat, float lon, float lat2, float lon2) {

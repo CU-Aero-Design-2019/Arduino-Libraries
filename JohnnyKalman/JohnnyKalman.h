@@ -314,7 +314,11 @@ namespace JohnnyKalman {
 		SpecGPS::LLA lla_coor;
 		lla_coor.lat = SpecGPS::gps.location.lat();
 		lla_coor.lng = SpecGPS::gps.location.lng();
+		#ifdef HASBMP
 		lla_coor.alt = bmp.readOffsetAltitude();
+		#else
+		lla_coor.alt = SpecGPS::getOffsetAlt();
+		#endif
 		// lla_coor.lat = 39.747511;
 		// lla_coor.lng = -83.813272;
 		// lla_coor.alt = 25;
