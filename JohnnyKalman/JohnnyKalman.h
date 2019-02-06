@@ -233,7 +233,11 @@ namespace JohnnyKalman {
 		LLAT_in gps_input;
 		gps_input.lat_in = SpecGPS::gps.location.lat();
 		gps_input.lon_in = SpecGPS::gps.location.lng();
+		#ifdef HASBMP
 		gps_input.alt_in = bmp.readOffsetAltitude();
+		#else
+		gps_input.alt_in = SpecGPS::getOffsetAlt();
+		#endif
 		gps_input.minutes = SpecGPS::gps.time.minute();
 		gps_input.seconds = SpecGPS::gps.time.second();
 		gps_input.centiseconds = SpecGPS::gps.time.centisecond();

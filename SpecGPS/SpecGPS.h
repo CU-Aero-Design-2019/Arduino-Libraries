@@ -81,7 +81,7 @@ void update() {
 }
 
 float getOffsetAlt() {
-	Serial.println("returning alt");
+	//Serial.println("returning alt");
 	return gps.altitude.meters() - baselineAlt;
 }
 
