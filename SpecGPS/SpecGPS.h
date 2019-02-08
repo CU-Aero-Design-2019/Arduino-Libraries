@@ -63,6 +63,10 @@ void setup() {
 	GPSSerial.write(setupGPS2, sizeof(setupGPS1));
 }
 
+void resetOffset() {
+	baselineAlt = gps.altitude.meters();
+}
+
 void update() {
 	while (GPSSerial.available() > 0){
 		gps.encode(GPSSerial.read());
@@ -73,15 +77,13 @@ void update() {
 		hasLock = false;
 	}
 	#ifndef HASBMP
-	if (baselineAlt < 1 && gps.satellites.value() > 6) {
-		Serial.println("Setting baseline alt");
-		baselineAlt = gps.altitude.meters();
+	if (baselineAlt < 1 && gps.satellites.value() > 5) {
+		resetOffset();
 	}
 	#endif
 }
 
 float getOffsetAlt() {
-	//Serial.println("returning alt");
 	return gps.altitude.meters() - baselineAlt;
 }
 
@@ -155,6 +157,22 @@ void lla_to_enu(LLA& in, LLA lla_ref, ENU& out){
 	ECEF ecef_ref;
 	lla_to_ecef(lla_ref, ecef_ref);
 	ecef_to_enu(lla_ref, ecef_ref, temp, out);
+}
+
+void lla_to_enu(float &a, float &b, float &c) {
+	LLA in;
+	in.lat = a;
+	in.lng = b;
+	in.alt = c;
+	LLA target;
+	target.lat = Settings::targetLatitude;
+	target.lng = Settings::targetLongitude;
+	target.alt = 0;
+	ENU out;
+	lla_to_enu(in, target, out);
+	a = out.e;
+	b = out.n;
+	c = out.u;
 }
 
 bool equals(LLA a, LLA b){

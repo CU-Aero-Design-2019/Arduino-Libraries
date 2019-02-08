@@ -16,6 +16,11 @@ float SpecBMP180::getKAlt() {
 	return filteredAlt;
 }
 
+void SpecBMP180::resetOffset() {
+	this->baselineAlt = this->readAltitude();
+	Serial.println("Reset baseline alt");
+}
+
 boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode) {
     if (mode > BMP085_ULTRAHIGHRES)
         mode = BMP085_ULTRAHIGHRES;
@@ -68,8 +73,6 @@ boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode) {
     Serial.print("md = ");
     Serial.println(md, DEC);
 #endif
-
-
 
     for(int i = 0; i < nInitSamples; i++){
         this->baselineAlt += this->readAltitude();

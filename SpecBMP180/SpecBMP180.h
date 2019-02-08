@@ -59,8 +59,9 @@ class SpecBMP180 {
         const unsigned long UpdatePeriod = 10;
 
         float baselineAlt = 0;
-        int nAverageSamples = 0;
         float averageSum = 0;
+		
+		void resetOffset();
 
     private:
         int32_t computeB5(int32_t UT);

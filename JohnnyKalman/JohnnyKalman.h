@@ -5,6 +5,8 @@
 #include <SpecGPS.h>
 #include <SpecBMP180.h>
 
+extern SpecBMP180 bmp;
+
 namespace JohnnyKalman {
 	
 	const int debugEnabled = 0;
@@ -227,7 +229,7 @@ namespace JohnnyKalman {
 	void my_vec_scalar_mult(double *vec_in, double *vec_out, double num_mult, int n_len);
 	void my_vec_copy(double *vec_in, double *vec_out, int n_len);
 	 
-	void initial_kf_setup(SpecGPS::LLA targetLLA) {
+	void initial_kf_setup() {
 		hasDoneSetup = true;
 		
 		LLAT_in gps_input;
@@ -294,18 +296,22 @@ namespace JohnnyKalman {
 			Serial.println(x0_z[1]);
 		}
 		
-		lla_ref = targetLLA;
+		
+		SpecGPS::LLA targetLLA;
+		targetLLA.lat = Settings::targetLatitude;
+		targetLLA.lng = Settings::targetLongitude;
+		targetLLA.alt = 0;
 		if (debugEnabled) {
 			Serial.print("lla target: ");
-			Serial.print(lla_ref.lat, 8);
+			Serial.print(targetLLA.lat, 8);
 			Serial.print("\t");
-			Serial.print(lla_ref.lng, 8);
+			Serial.print(targetLLA.lng, 8);
 			Serial.print("\t");
-			Serial.print(lla_ref.alt, 1);
+			Serial.print(targetLLA.alt, 1);
 			Serial.print("\t");
 			Serial.print("\n");
 		}
-		SpecGPS::lla_to_ecef(lla_ref, XYZ_ecef_ref);
+		SpecGPS::lla_to_ecef(targetLLA, XYZ_ecef_ref);
 		xyz_enu_ref.e = 0;
 		xyz_enu_ref.n = 0;
 		xyz_enu_ref.u = 0;
@@ -320,8 +326,11 @@ namespace JohnnyKalman {
 		lla_coor.lng = SpecGPS::gps.location.lng();
 		#ifdef HASBMP
 		lla_coor.alt = bmp.readOffsetAltitude();
+		Serial.println("Input alt: " + String(lla_coor.alt));
+		//Serial.println("Input alt: " + String(lla_coor.alt));
 		#else
 		lla_coor.alt = SpecGPS::getOffsetAlt();
+		Serial.println("Input alt: " + String(lla_coor.alt));
 		#endif
 		// lla_coor.lat = 39.747511;
 		// lla_coor.lng = -83.813272;
