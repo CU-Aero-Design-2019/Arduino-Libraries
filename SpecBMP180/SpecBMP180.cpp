@@ -18,7 +18,7 @@ float SpecBMP180::getKAlt() {
 
 void SpecBMP180::resetOffset() {
 	this->baselineAlt = this->readAltitude();
-	Serial.println("Reset baseline alt");
+	Serial.println("Resetting baseline alt");
 }
 
 boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode) {

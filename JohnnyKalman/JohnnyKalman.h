@@ -236,9 +236,9 @@ namespace JohnnyKalman {
 		gps_input.lat_in = SpecGPS::gps.location.lat();
 		gps_input.lon_in = SpecGPS::gps.location.lng();
 		#ifdef HASBMP
-		gps_input.alt_in = bmp.readOffsetAltitude();
+		//gps_input.alt_in = bmp.readOffsetAltitude();
 		#else
-		gps_input.alt_in = SpecGPS::getOffsetAlt();
+		//gps_input.alt_in = SpecGPS::getOffsetAlt();
 		#endif
 		gps_input.minutes = SpecGPS::gps.time.minute();
 		gps_input.seconds = SpecGPS::gps.time.second();
@@ -325,13 +325,13 @@ namespace JohnnyKalman {
 		lla_coor.lat = SpecGPS::gps.location.lat();
 		lla_coor.lng = SpecGPS::gps.location.lng();
 		#ifdef HASBMP
-		lla_coor.alt = bmp.readOffsetAltitude();
-		Serial.println("Input alt: " + String(lla_coor.alt));
+		//lla_coor.alt = bmp.readOffsetAltitude();
 		//Serial.println("Input alt: " + String(lla_coor.alt));
 		#else
-		lla_coor.alt = SpecGPS::getOffsetAlt();
-		Serial.println("Input alt: " + String(lla_coor.alt));
+		//lla_coor.alt = SpecGPS::getOffsetAlt();
+		//Serial.println("Input alt: " + String(lla_coor.alt));
 		#endif
+		lla_coor.alt = 0;
 		// lla_coor.lat = 39.747511;
 		// lla_coor.lng = -83.813272;
 		// lla_coor.alt = 25;
