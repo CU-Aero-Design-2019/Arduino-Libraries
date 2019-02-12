@@ -159,14 +159,14 @@ void lla_to_enu(LLA& in, LLA lla_ref, ENU& out){
 	ecef_to_enu(lla_ref, ecef_ref, temp, out);
 }
 
-void lla_to_enu(float &a, float &b, float &c) {
+void lla_to_enu(float &a, float &b, float &c, float targLat, float targLng) {
 	LLA in;
 	in.lat = a;
 	in.lng = b;
 	in.alt = c;
 	LLA target;
-	target.lat = Settings::targetLatitude;
-	target.lng = Settings::targetLongitude;
+	target.lat = targLat;
+	target.lng = targLng;
 	target.alt = 0;
 	ENU out;
 	lla_to_enu(in, target, out);
