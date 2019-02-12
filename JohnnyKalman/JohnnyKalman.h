@@ -63,9 +63,9 @@ namespace JohnnyKalman {
 	
 	// alpha values
 	// knobs for the process noise matrix
-	const double x_enu_alpha = 1000;
-	const double y_enu_alpha = 1000;
-	const double z_enu_alpha = 1000;
+	const double x_enu_alpha = 3500;
+	const double y_enu_alpha = 3500;
+	const double z_enu_alpha = 3500;
 	// TODO: Make these bigger ^V
 	const double x_sig_acc = 0.05;
 	const double y_sig_acc = 0.05;
@@ -332,7 +332,7 @@ namespace JohnnyKalman {
 		lla_coor.alt = SpecGPS::getOffsetAlt();
 		//Serial.println("Input alt: " + String(lla_coor.alt));
 		#endif
-		lla_coor.alt = 0;
+		//lla_coor.alt = 0;
 		// lla_coor.lat = 39.747511;
 		// lla_coor.lng = -83.813272;
 		// lla_coor.alt = 25;

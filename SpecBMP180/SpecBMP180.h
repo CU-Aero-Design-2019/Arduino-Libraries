@@ -61,7 +61,7 @@ class SpecBMP180 {
         float baselineAlt = 0;
         float averageSum = 0;
 		
-		void resetOffset();
+		void resetOffset(int nSamples = 1);
 
     private:
         int32_t computeB5(int32_t UT);

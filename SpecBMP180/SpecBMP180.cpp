@@ -16,8 +16,13 @@ float SpecBMP180::getKAlt() {
 	return filteredAlt;
 }
 
-void SpecBMP180::resetOffset() {
-	this->baselineAlt = this->readAltitude();
+void SpecBMP180::resetOffset(int nSamples) {
+	int sum = 0;
+	for (int i = 0; i < nSamples; i++) {
+		sum += this->readAltitude();
+	}
+	sum /= nSamples;
+	this->baselineAlt = sum;
 	Serial.println("Resetting baseline alt");
 }
 
