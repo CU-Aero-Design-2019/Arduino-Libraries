@@ -63,7 +63,7 @@ class SpecBMP180 {
 		int currentSample = 0;
 		float samples[NUMBEROFSAMPLES];
 		float avgSum;
-		void resetOffset();
+		void resetOffset(int nSamples = 1);
 
     private:
         int32_t computeB5(int32_t UT);
