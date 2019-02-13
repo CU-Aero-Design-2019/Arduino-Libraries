@@ -1,6 +1,6 @@
 #include "SpecBMP180.h"
 
-SpecBMP180::SpecBMP180() : altFilter(0.5, 10, 0.01) {
+SpecBMP180::SpecBMP180() : altFilter(0.1, 20, 0.01) {
 //SpecBMP180::SpecBMP180() {
 
 }
