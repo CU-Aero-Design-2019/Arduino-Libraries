@@ -60,7 +60,9 @@ class SpecBMP180 {
 
         float baselineAlt = 0;
         float averageSum = 0;
-		
+		int currentSample = 0;
+		float samples[NUMBEROFSAMPLES];
+		float avgSum;
 		void resetOffset();
 
     private:
@@ -69,9 +71,7 @@ class SpecBMP180 {
         uint16_t read16(uint8_t addr);
         void write8(uint8_t addr, uint8_t data);
 		
-		uint8_t currentSample = 0;
-		float samples[NUMBEROFSAMPLES];
-		float avgSum = 0;
+		
 		SimpleKalmanFilter altFilter;
 		
 		float filteredAlt;
