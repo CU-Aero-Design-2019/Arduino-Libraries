@@ -37,6 +37,8 @@ float baselineAlt = 0;
 
 const float deg_to_rad = 0.01745329251;
 
+ENU currentENU;
+
 // The TinyGPS++ object
 TinyGPSPlus gps;
 
@@ -171,7 +173,9 @@ void lla_to_enu(double &a, double &b, double &c, double targLat, double targLng)
 	ENU out;
 	lla_to_enu(in, target, out);
 	a = out.e;
+	//Serial.print("a = "); Serial.println(a);
 	b = out.n;
+	//Serial.print("b = "); Serial.println(b);
 	c = out.u;
 }
 
