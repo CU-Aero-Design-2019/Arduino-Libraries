@@ -38,6 +38,7 @@ float baselineAlt = 0;
 const float deg_to_rad = 0.01745329251;
 
 ENU currentENU;
+ENU prevENU;
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -94,8 +95,8 @@ void update() {
 	}
 	#endif
 	
-	//Serial.print("Sentences that failed checksum=");
-	//Serial.println(gps.failedChecksum());
+	Serial.print("Sentences that failed checksum=");
+	Serial.println(gps.failedChecksum());
 }
 
 float getOffsetAlt() {
