@@ -70,6 +70,7 @@ void resetOffset() {
 void update() {
 	while (GPSSerial.available() > 0){
 		gps.encode(GPSSerial.read());
+		//Serial3.write(GPSSerial.read());
 	}
 	if (gps.location.isValid() && gps.location.age() < 1000) {
 		hasLock = true;
@@ -81,6 +82,9 @@ void update() {
 		resetOffset();
 	}
 	#endif
+	
+	Serial.print("Sentences that failed checksum=");
+	Serial.println(gps.failedChecksum());
 }
 
 float getOffsetAlt() {

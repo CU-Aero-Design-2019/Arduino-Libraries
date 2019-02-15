@@ -5,15 +5,20 @@ SpecBMP180::SpecBMP180() : altFilter(0.1, 20, 0.01) {
 
 }
 
-// updates kalman filter?
+// updates kalman filter, altitudes
 void SpecBMP180::update() {
-	float alt = readOffsetAltitude();
-	filteredAlt = altFilter.updateEstimate(alt);
+	rawAlt = updateOffsetAltitude();
+	filteredAlt = altFilter.updateEstimate(rawAlt);
+	avgAlt = updateAvgOffsetAltitude(rawAlt);
 }
 
 // returns altitude after kalman filter
 float SpecBMP180::getKAlt() {
 	return filteredAlt;
+}
+
+float SpecBMP180::readAvgOffsetAltitude(){
+	return avgAlt;
 }
 
 void SpecBMP180::resetOffset(int nSamples) {
@@ -270,20 +275,24 @@ float SpecBMP180::readAltitude(float sealevelPressure) {
     float altitude;
 
     float pressure = readPressure();
-
+    
     altitude = 44330 * (1.0 - pow(pressure / sealevelPressure, 0.1903));
 
     return altitude;
 }
 
-float SpecBMP180::readOffsetAltitude(float sealevelPressure) {
+float SpecBMP180::updateOffsetAltitude(float sealevelPressure) {
     return (readAltitude(sealevelPressure) - baselineAlt);
 }
 
-float SpecBMP180::readAvgOffsetAltitude(float sealevelPressure) {
+float SpecBMP180::readOffsetAltitude(float sealevelPressure) {
+    return rawAlt;
+}
+
+float SpecBMP180::updateAvgOffsetAltitude(float alt) {
 	avgSum -= samples[currentSample];                              
 	
-	samples[currentSample] = readAltitude(sealevelPressure) - baselineAlt;
+	samples[currentSample] = alt;
 	
 	avgSum += samples[currentSample];
 	currentSample++;

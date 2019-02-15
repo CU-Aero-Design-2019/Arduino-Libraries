@@ -49,7 +49,7 @@ class SpecBMP180 {
         float readTemperature(void);
         int32_t readPressure(void);
         int32_t readSealevelPressure(float altitude_meters = 0);
-		float readAvgOffsetAltitude(float sealevelPressure = 101325);
+		float readAvgOffsetAltitude();
         float readAltitude(float sealevelPressure = 101325); // std atmosphere
         float readOffsetAltitude(float sealevelPressure = 101325);
         uint16_t readRawTemperature(void);
@@ -64,13 +64,18 @@ class SpecBMP180 {
 		float samples[NUMBEROFSAMPLES];
 		float avgSum;
 		void resetOffset(int nSamples = 1);
+		
+		
+		float rawAlt = 0;
+		float avgAlt = 0;
 
     private:
         int32_t computeB5(int32_t UT);
         uint8_t read8(uint8_t addr);
         uint16_t read16(uint8_t addr);
         void write8(uint8_t addr, uint8_t data);
-		
+		float updateOffsetAltitude(float sealevelPressure = 101325);
+		float updateAvgOffsetAltitude(float alt);
 		
 		SimpleKalmanFilter altFilter;
 		
