@@ -86,7 +86,6 @@ boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode) {
 
     for(int i = 0; i < nInitSamples; i++){
         this->baselineAlt += this->readAltitude();
-        delay(1);
     }
     this->baselineAlt /= nInitSamples;
 
