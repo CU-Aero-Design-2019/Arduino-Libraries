@@ -95,8 +95,8 @@ void update() {
 	}
 	#endif
 	
-	Serial.print("Sentences that failed checksum=");
-	Serial.println(gps.failedChecksum());
+	// Serial.print("Sentences that failed checksum=");
+	// Serial.println(gps.failedChecksum());
 }
 
 float getOffsetAlt() {
