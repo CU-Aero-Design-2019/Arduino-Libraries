@@ -80,6 +80,8 @@ class SpecBMP180 {
 		SimpleKalmanFilter altFilter;
 		
 		float filteredAlt;
+        long nextTime;
+        uint32_t UT, UP, p;
 
     uint8_t oversampling;
 

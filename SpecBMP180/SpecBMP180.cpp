@@ -148,98 +148,76 @@ uint32_t SpecBMP180::readRawPressure(void) {
 }
 
 int32_t SpecBMP180::readPressure(void) {
-    int32_t UT, UP, B3, B5, B6, X1, X2, X3, p;
+    int32_t B3, B5, B6, X1, X2, X3;
     uint32_t B4, B7;
 
-    UT = readRawTemperature();
-    UP = readRawPressure();
+    switch (state) {
+        case 0:
+            write8(BMP085_CONTROL, BMP085_READTEMPCMD);
+            nextTime = millis() + 5;
+            state++;
+            break;
+        case 1:
+            if (millis() >= nextTime) {
+                UT = read16(BMP085_TEMPDATA);
+                write8(BMP085_CONTROL, BMP085_READPRESSURECMD + (oversampling << 6));
+                switch (oversampling) {
+                    case BMP085_ULTRALOWPOWER:
+                        nextTime = millis() + 5;
+                        break;
+                    case BMP085_STANDARD:
+                        nextTime = millis() + 8;
+                        break;
+                    case BMP085_HIGHRES:
+                        nextTime = millis() + 14;
+                        break;
+                    default:
+                        nextTime = millis() + 26;
+                        break;
+                }
+                B5 = computeB5(UT);
+                state++;
+            }
+            break;
+        case 2:
+            if (millis() >= nextTime) {
+                UP = read16(BMP085_PRESSUREDATA);
+                UP <<= 8;
+                UP |= read8(BMP085_PRESSUREDATA + 2);
+                UP >>= (8 - oversampling);
 
-#if BMP085_DEBUG == 1
-    // use datasheet numbers!
-    UT = 27898;
-    UP = 23843;
-    ac6 = 23153;
-    ac5 = 32757;
-    mc = -8711;
-    md = 2868;
-    b1 = 6190;
-    b2 = 4;
-    ac3 = -14383;
-    ac2 = -72;
-    ac1 = 408;
-    ac4 = 32741;
-    oversampling = 0;
-#endif
+                // do pressure calcs
+                B6 = B5 - 4000;
+                X1 = ((int32_t)b2 * ((B6 * B6) >> 12)) >> 11;
+                X2 = ((int32_t)ac2 * B6) >> 11;
+                X3 = X1 + X2;
+                B3 = ((((int32_t)ac1 * 4 + X3) << oversampling) + 2) / 4;
 
-    B5 = computeB5(UT);
+                X1 = ((int32_t)ac3 * B6) >> 13;
+                X2 = ((int32_t)b1 * ((B6 * B6) >> 12)) >> 16;
+                X3 = ((X1 + X2) + 2) >> 2;
+                B4 = ((uint32_t)ac4 * (uint32_t)(X3 + 32768)) >> 15;
+                B7 = ((uint32_t)UP - B3) * (uint32_t)(50000UL >> oversampling);
 
-#if BMP085_DEBUG == 1
-    Serial.print("X1 = ");
-    Serial.println(X1);
-    Serial.print("X2 = ");
-    Serial.println(X2);
-    Serial.print("B5 = ");
-    Serial.println(B5);
-#endif
+                if (B7 < 0x80000000) {
+                    p = (B7 * 2) / B4;
+                } else {
+                    p = (B7 / B4) * 2;
+                }
+                X1 = (p >> 8) * (p >> 8);
+                X1 = (X1 * 3038) >> 16;
+                X2 = (-7357 * p) >> 16;
 
-    // do pressure calcs
-    B6 = B5 - 4000;
-    X1 = ((int32_t)b2 * ((B6 * B6) >> 12)) >> 11;
-    X2 = ((int32_t)ac2 * B6) >> 11;
-    X3 = X1 + X2;
-    B3 = ((((int32_t)ac1 * 4 + X3) << oversampling) + 2) / 4;
+                p = p + ((X1 + X2 + (int32_t)3791) >> 4);
 
-#if BMP085_DEBUG == 1
-    Serial.print("B6 = ");
-    Serial.println(B6);
-    Serial.print("X1 = ");
-    Serial.println(X1);
-    Serial.print("X2 = ");
-    Serial.println(X2);
-    Serial.print("B3 = ");
-    Serial.println(B3);
-#endif
-
-    X1 = ((int32_t)ac3 * B6) >> 13;
-    X2 = ((int32_t)b1 * ((B6 * B6) >> 12)) >> 16;
-    X3 = ((X1 + X2) + 2) >> 2;
-    B4 = ((uint32_t)ac4 * (uint32_t)(X3 + 32768)) >> 15;
-    B7 = ((uint32_t)UP - B3) * (uint32_t)(50000UL >> oversampling);
-
-#if BMP085_DEBUG == 1
-    Serial.print("X1 = ");
-    Serial.println(X1);
-    Serial.print("X2 = ");
-    Serial.println(X2);
-    Serial.print("B4 = ");
-    Serial.println(B4);
-    Serial.print("B7 = ");
-    Serial.println(B7);
-#endif
-
-    if (B7 < 0x80000000) {
-        p = (B7 * 2) / B4;
-    } else {
-        p = (B7 / B4) * 2;
+                state = 0;
+            }
+            break;
     }
-    X1 = (p >> 8) * (p >> 8);
-    X1 = (X1 * 3038) >> 16;
-    X2 = (-7357 * p) >> 16;
 
-#if BMP085_DEBUG == 1
-    Serial.print("p = ");
-    Serial.println(p);
-    Serial.print("X1 = ");
-    Serial.println(X1);
-    Serial.print("X2 = ");
-    Serial.println(X2);
-#endif
+    
 
-    p = p + ((X1 + X2 + (int32_t)3791) >> 4);
-#if BMP085_DEBUG == 1
-    Serial.print("p = ");
-    Serial.println(p);
-#endif
+
     return p;
 }
 
