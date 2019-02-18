@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include <SimpleKalmanFilter.h>
 
 namespace SpecHMC5883{
         
@@ -15,6 +16,9 @@ namespace SpecHMC5883{
 
     int16_t x, y, z;
 	float heading;
+	float filteredHeading;
+	
+	SimpleKalmanFilter headingFilter(0.1, 20, 0.01);
 
     void setup(){
         Wire.begin();
@@ -42,11 +46,14 @@ namespace SpecHMC5883{
             y = Wire.read()<<8; //Y msb
             y |= Wire.read(); //Y lsb
 			heading = atan2(x, y) / 0.0174532925;
+			heading -= 180;
+			//heading += 6; // declination
 			if (heading < 0) {
 				heading += 360;
 			}
-			heading = 360 - heading; // N=0/360, E=90, S=180, W=270
+			//heading = 360 - heading; // N=0/360, E=90, S=180, W=270
         }
+		filteredHeading = headingFilter.updateEstimate(heading);
     }
 
 };
