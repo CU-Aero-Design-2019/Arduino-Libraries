@@ -15,6 +15,11 @@ SimpleKalmanFilter::SimpleKalmanFilter(float mea_e, float est_e, float q)
   _q = q;
 }
 
+void SimpleKalmanFilter::reset() {
+	_last_estimate = 0;
+	_current_estimate = 0;
+}
+
 float SimpleKalmanFilter::updateEstimate(float mea)
 {
   _kalman_gain = _err_estimate/(_err_estimate + _err_measure);

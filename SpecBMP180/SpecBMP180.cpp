@@ -9,7 +9,7 @@ SpecBMP180::SpecBMP180() : altFilter(0.1, 20, 0.01) {
 void SpecBMP180::update() {
 	rawAlt = updateOffsetAltitude();
 	filteredAlt = altFilter.updateEstimate(rawAlt);
-	avgAlt = updateAvgOffsetAltitude(rawAlt);
+	//avgAlt = updateAvgOffsetAltitude(rawAlt);
 }
 
 // returns altitude after kalman filter
@@ -28,6 +28,7 @@ void SpecBMP180::resetOffset(int nSamples) {
 	}
 	sum /= nSamples;
 	this->baselineAlt = sum;
+	altFilter.reset();
 	Serial.println("Resetting baseline alt");
 }
 
@@ -57,42 +58,9 @@ boolean SpecBMP180::begin(uint8_t nInitSamples, uint8_t mode) {
     mb = read16(BMP085_CAL_MB);
     mc = read16(BMP085_CAL_MC);
     md = read16(BMP085_CAL_MD);
-#if (BMP085_DEBUG == 1)
-    Serial.print("ac1 = ");
-    Serial.println(ac1, DEC);
-    Serial.print("ac2 = ");
-    Serial.println(ac2, DEC);
-    Serial.print("ac3 = ");
-    Serial.println(ac3, DEC);
-    Serial.print("ac4 = ");
-    Serial.println(ac4, DEC);
-    Serial.print("ac5 = ");
-    Serial.println(ac5, DEC);
-    Serial.print("ac6 = ");
-    Serial.println(ac6, DEC);
 
-    Serial.print("b1 = ");
-    Serial.println(b1, DEC);
-    Serial.print("b2 = ");
-    Serial.println(b2, DEC);
-
-    Serial.print("mb = ");
-    Serial.println(mb, DEC);
-    Serial.print("mc = ");
-    Serial.println(mc, DEC);
-    Serial.print("md = ");
-    Serial.println(md, DEC);
-#endif
-
-    for(int i = 0; i < nInitSamples; i++){
-        this->baselineAlt += this->readAltitude();
-    }
-    this->baselineAlt /= nInitSamples;
-
-	for(int i = 0; i < NUMBEROFSAMPLES; i++){
-		samples[i] = 0;
-	}
-	
+    resetOffset(50);
+		
     return true;
 }
 
@@ -102,59 +70,56 @@ int32_t SpecBMP180::computeB5(int32_t UT) {
     return X1 + X2;
 }
 
-uint16_t SpecBMP180::readRawTemperature(void) {
-    write8(BMP085_CONTROL, BMP085_READTEMPCMD);
-    delay(5);
-#if BMP085_DEBUG == 1
-    Serial.print("Raw temp: ");
-    Serial.println(read16(BMP085_TEMPDATA));
-#endif
-    return read16(BMP085_TEMPDATA);
-}
+// uint16_t SpecBMP180::readRawTemperature(void) {
+    // write8(BMP085_CONTROL, BMP085_READTEMPCMD);
+    // delay(5);
+    // return read16(BMP085_TEMPDATA);
+// }
 
-uint32_t SpecBMP180::readRawPressure(void) {
-    uint32_t raw;
+// uint32_t SpecBMP180::readRawPressure(void) {
+    // uint32_t raw;
 
-    write8(BMP085_CONTROL, BMP085_READPRESSURECMD + (oversampling << 6));
+    // write8(BMP085_CONTROL, BMP085_READPRESSURECMD + (oversampling << 6));
 
-    if (oversampling == BMP085_ULTRALOWPOWER)
-        delay(5);
-    else if (oversampling == BMP085_STANDARD)
-        delay(8);
-    else if (oversampling == BMP085_HIGHRES)
-        delay(14);
-    else
-        delay(26);
+    // if (oversampling == BMP085_ULTRALOWPOWER)
+        // delay(5);
+    // else if (oversampling == BMP085_STANDARD)
+        // delay(8);
+    // else if (oversampling == BMP085_HIGHRES)
+        // delay(14);
+    // else
+        // delay(26);
 
-    raw = read16(BMP085_PRESSUREDATA);
+    // raw = read16(BMP085_PRESSUREDATA);
 
-    raw <<= 8;
-    raw |= read8(BMP085_PRESSUREDATA + 2);
-    raw >>= (8 - oversampling);
+    // raw <<= 8;
+    // raw |= read8(BMP085_PRESSUREDATA + 2);
+    // raw >>= (8 - oversampling);
 
-    /* this pull broke stuff, look at it later?
-  if (oversampling==0) {
-    raw <<= 8;
-    raw |= read8(BMP085_PRESSUREDATA+2);
-    raw >>= (8 - oversampling);
-  }
- */
+    // /* this pull broke stuff, look at it later?
+  // if (oversampling==0) {
+    // raw <<= 8;
+    // raw |= read8(BMP085_PRESSUREDATA+2);
+    // raw >>= (8 - oversampling);
+  // }
+ // */
 
-#if BMP085_DEBUG == 1
-    Serial.print("Raw pressure: ");
-    Serial.println(raw);
-#endif
-    return raw;
-}
+// #if BMP085_DEBUG == 1
+    // Serial.print("Raw pressure: ");
+    // Serial.println(raw);
+// #endif
+    // return raw;
+// }
 
 int32_t SpecBMP180::readPressure(void) {
-    int32_t B3, B5, B6, X1, X2, X3;
+    int32_t B3, B6, X1, X2, X3;
     uint32_t B4, B7;
 
     switch (state) {
         case 0:
             write8(BMP085_CONTROL, BMP085_READTEMPCMD);
             nextTime = millis() + 5;
+			//Serial.println("write temp");
             state++;
             break;
         case 1:
@@ -175,6 +140,7 @@ int32_t SpecBMP180::readPressure(void) {
                         nextTime = millis() + 26;
                         break;
                 }
+				//Serial.println("read temp, write pressure");
                 B5 = computeB5(UT);
                 state++;
             }
@@ -209,15 +175,13 @@ int32_t SpecBMP180::readPressure(void) {
                 X2 = (-7357 * p) >> 16;
 
                 p = p + ((X1 + X2 + (int32_t)3791) >> 4);
+				
+				//Serial.println("read pressure");
 
                 state = 0;
             }
             break;
     }
-
-    
-
-
     return p;
 }
 
