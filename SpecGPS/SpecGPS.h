@@ -44,7 +44,7 @@ ENU prevENU;
 TinyGPSPlus gps;
 
 void setup() {
-	GPSSerial.begin(9600);
+	GPSSerial.begin(57600);
 	
 	byte setups[] = {
 		
