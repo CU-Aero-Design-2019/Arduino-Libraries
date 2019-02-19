@@ -11,6 +11,8 @@ namespace SpecSD{
     const unsigned long UpdatePeriod = 10;
     String fileName;
     File dataFile;
+	
+	void writeTelemetry(String data);
 
     void setup(String theFileName) {
         // PB12 is needed as a CS pin. We shouldn't need to use it in hardware, but it's needed for the lib
@@ -35,39 +37,7 @@ namespace SpecSD{
 		
 		fileName = theFileName + String(currentIndex) + ".txt";
 
-        writeTelemetry("lat,lng,gpsAlt,speedMPS,bmpAlt,cHead,wE,wN,hE,hW,cE,cN,cU,gpsT,millis");
-
-        /*
-        sdt += String(SpecGPS::gps.location.lat(), 6);
-        sdt += " ";
-        sdt += String(SpecGPS::gps.location.lng(), 6); // deg
-        sdt += " ";
-        sdt += String(SpecGPS::getOffsetAlt(), 1); // m
-        sdt += " ";
-        sdt += String(SpecGPS::gps.speed.mps(), 2); // m/s
-        sdt += " ";
-        sdt += String(bmp.getKAlt(), 2); // m
-        sdt += " ";
-        sdt += String(SpecHMC5883::heading, 2); // deg
-        sdt += " ";
-        sdt += String(Prediction::watPrediction.e, 2);
-        sdt += " ";
-        sdt += String(Prediction::watPrediction.n, 2);
-        sdt += " ";
-        sdt += String(Prediction::habPrediction.e, 2);
-        sdt += " ";
-        sdt += String(Prediction::habPrediction.n, 2);
-        sdt += " ";
-        sdt += String(SpecGPS.currentENU.e);
-        sdt += " ";
-        sdt += String(SpecGPS.currentENU.n);
-        sdt += " ";
-        sdt += String(SpecGPS.currentENU.u);
-        sdt += " ";
-        sdt += String(SpecGPS::gps.time.value());
-        sdt += " ";
-        sdt += String(millis() / 100);
-        */
+        writeTelemetry("lat lng gpsAlt speedMPS bmpAlt cHead wE wN hE hW cE cN cU gpsTime");
 
 	}
 
@@ -76,7 +46,7 @@ namespace SpecSD{
         //Serial.println(fileName);
         if(dataFile){
             dataFile.print(data);
-			dataFile.print(" ");
+			//dataFile.print(" ");
             dataFile.close();
         }
     }
