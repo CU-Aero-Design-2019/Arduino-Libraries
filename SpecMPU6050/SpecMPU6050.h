@@ -30,6 +30,10 @@ namespace SpecMPU6050{
     float interval;
 	long preInterval;
 	float accCoef = 0.1, gyroCoef = 0.9;
+	
+	float angleZraw;
+	float angleZatLaunch = 0;
+	int compassAtlaunch = 0;
 
     void writeIMU(byte reg, byte data){
         Wire.beginTransmission(MPU6050_ADDR);
@@ -82,7 +86,16 @@ namespace SpecMPU6050{
 
         angleX = (gyroCoef * (angleX + gyroX * interval)) + (accCoef * angleAccX);
         angleY = (gyroCoef * (angleY + gyroY * interval)) + (accCoef * angleAccY);
-        angleZ = angleGyroZ;
+        
+		while(angleGyroZ<0) angleGyroZ += 360;
+		while(angleGyroZ>360) angleGyroZ -= 360;
+		
+		angleZraw = 360 - angleGyroZ;
+		
+		angleZ = angleZraw + compassAtlaunch - angleZatLaunch;
+		
+		while(angleZ<0) angleZ += 360;
+		while(angleZ>360) angleZ -= 360;
 
         preInterval = millis();
     }
