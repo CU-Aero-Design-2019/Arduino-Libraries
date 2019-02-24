@@ -38,7 +38,6 @@ float baselineAlt = 0;
 const float deg_to_rad = 0.01745329251;
 
 ENU currentENU;
-ENU prevENU;
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -50,7 +49,7 @@ void setup() {
 	#endif
 	#ifndef GLIDER
 	//Is a mothership build
-	GPSSerial.begin(57600);
+	GPSSerial.begin(9600);
 	#endif
 	
 	
@@ -143,23 +142,25 @@ float getOffsetAlt() {
 	return gps.altitude.meters() - baselineAlt;
 }
 
-int bearing(float lat, float lon, float lat2, float lon2) {
+double bearing(double lat, double lon, double lat2, double lon2) {
 
-	float teta1 = radians(lat);
-	float teta2 = radians(lat2);
-	float delta1 = radians(lat2-lat);
-	float delta2 = radians(lon2-lon);
+	return degrees(atan2(lat2 - lat, lon2 - lon));
 
-	float y = sin(delta2) * cos(teta2);
-	float x = cos(teta1)*sin(teta2) - sin(teta1)*cos(teta2)*cos(delta2);
-	float brng = atan2(y,x);
-	brng = degrees(brng);// radians to degrees
+	// double teta1 = radians(lat);
+	// double teta2 = radians(lat2);
+	// double delta1 = radians(lat2-lat);
+	// double delta2 = radians(lon2-lon);
+
+	// double y = sin(delta2) * cos(teta2);
+	// double x = cos(teta1)*sin(teta2) - sin(teta1)*cos(teta2)*cos(delta2);
+	// double brng = atan2(y,x);
+	// brng = degrees(brng);// radians to degrees
 	
-	while (brng >= 360) {
-		brng -= 360.0;
-	}
+	// while (brng >= 360) {
+	// 	brng -= 360.0;
+	// }
 
-	return round(brng);
+	// return brng;
 }
 
 void lla_to_ecef(LLA& in, ECEF& out) {
