@@ -14,7 +14,7 @@ void SpecBMP180::update() {
 
 // returns altitude after kalman filter
 float SpecBMP180::getKAlt() {
-	return filteredAlt;
+	return filteredAlt + 0.63; // seems to always initialize to just below 0
 }
 
 float SpecBMP180::readAvgOffsetAltitude(){
