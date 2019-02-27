@@ -22,7 +22,7 @@ namespace SpecQMC5883{
     int heading;
 	int headingAverage;
 	
-	const int numSamps = 10;
+	const int numSamps = 20;
 	
 	float cosines[numSamps];
 	float sines[numSamps];
