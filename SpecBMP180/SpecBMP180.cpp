@@ -9,7 +9,7 @@ SpecBMP180::SpecBMP180() : altFilter(0.1, 20, 0.01) {
 void SpecBMP180::update() {
 	rawAlt = updateOffsetAltitude();
 	filteredAlt = altFilter.updateEstimate(rawAlt);
-	avgAlt = updateAvgOffsetAltitude(rawAlt);
+	//avgAlt = updateAvgOffsetAltitude(rawAlt);
 }
 
 // returns altitude after kalman filter
