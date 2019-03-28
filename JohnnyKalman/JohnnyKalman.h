@@ -7,6 +7,8 @@
 
 extern SpecBMP180 bmp;
 
+// everything should be in meters or meters/s
+
 namespace JohnnyKalman {
 	
 	const int debugEnabled = 0;
@@ -34,24 +36,28 @@ namespace JohnnyKalman {
 	SpecGPS::ECEF XYZ_ecef_ref;
 	SpecGPS::ENU xyz_enu_ref;
 	
-	Kalman_out filter_output;
-
+	Kalman_out filter_output; // output of plane in ENU
+	
+	// conversion constants
 	const double pi = 3.14159265359;
 	const double deg_to_rad = pi / 180;
 
+	// standard deviation of position error in x, y, and z directions (m)
 	const double x_sig_pos = 3.41;
 	const double y_sig_pos = 3.41;
 	const double z_sig_pos = 5;
 	
+	// covariance of position error in x, y, and z directions
 	const double cov_px = pow(x_sig_pos, 2);
 	const double cov_py = pow(y_sig_pos, 2);
 	const double cov_pz = pow(z_sig_pos, 2);
 	
-	// velocity sigmas 
+	// standard deviation of velocity error in x, y, and z (m/s) 
 	const double x_sig_vel = 0.5;
 	const double y_sig_vel = 0.5;
 	const double z_sig_vel = 0.5;
 	
+	// covariance of velocity error in x, y, and z 
 	const double cov_vx = pow(x_sig_vel, 2);
 	const double cov_vy = pow(y_sig_vel, 2);
 	const double cov_vz = pow(z_sig_vel, 2);
@@ -66,11 +72,13 @@ namespace JohnnyKalman {
 	const double x_enu_alpha = 3500;
 	const double y_enu_alpha = 3500;
 	const double z_enu_alpha = 3500;
-	// TODO: Make these bigger ^V
+	
+	// standard deviation of acceleration error in x, y, and z (m/s^2)
 	const double x_sig_acc = 0.05;
 	const double y_sig_acc = 0.05;
 	const double z_sig_acc = 0.05;
 	
+	// Declaration of variables to be used later on in the filter
 	double delta_time;
 	double t_curr;
 	double t_prev;
@@ -79,6 +87,7 @@ namespace JohnnyKalman {
 	double meas_vector_y[2];
 	double meas_vector_z[2];
 	
+	// acceleration control vectors in x, y, and z ... set to zero since we are not reading in any acceleration measurements in an ENU frame
 	double acc_control_vec_x[2] = { 0, 0 };
 	double acc_control_vec_y[2] = { 0, 0 };
 	double acc_control_vec_z[2] = { 0, 0 };
@@ -214,7 +223,7 @@ namespace JohnnyKalman {
 	void initial_kf_setup();
 	void kalman_update(LLAT_in gps_input, Kalman_out filter_output);
 
-	//Matrix and vector math prototypes here
+	//Matrix and vector math prototypes here ... functions implemented below
 	void my_mx_vec_mult(double *mx_in, double *vec_in, double *vec_out, int n_dim);
 	void my_mx_add(double *mx_a, double *mx_b, double *mx_out, int n_dim);
 	void my_mx_subtract(double *mx_a, double *mx_b, double *mx_out, int n_dim);
@@ -385,7 +394,8 @@ namespace JohnnyKalman {
 			// Serial.println("F2 initialized");
 		// }
 
-		// acceleration control matrix for 2 state
+		// state transition matrix for 2 state ... 
+		// used in part of the calculation of the equation of motion
 		// pre-declared up top with certain indices already assigned values
 		B2[0][0] = 0.5 * pow(delta_time, 2);
 		B2[1][1] = delta_time;
@@ -479,7 +489,6 @@ namespace JohnnyKalman {
 
 		// residual covariance ... "Innovation Covariance"
 		//matrix transpose should be done already ...
-
 		my_mx_mx_mult(H2[0], Px[0], H2_Px[0], 2);
 		my_mx_mx_mult(H2_Px[0], H2_t[0], H2_Px_H2_t[0], 2);
 		my_mx_add(H2_Px_H2_t[0], Rx[0], Sx[0], 2);
@@ -586,6 +595,7 @@ namespace JohnnyKalman {
 	//Create matrix and vector math functions here
 	//Matrix
 	void my_mx_vec_mult(double *mx_in, double *vec_in, double *vec_out, int n_dim) {
+	  // matrix * vector multiplication
 	  int i, j;
 	  for (i = 0; i < n_dim; i++) {
 		vec_out[i] = 0;
@@ -596,6 +606,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_mx_add(double *mx_a, double *mx_b, double *mx_out, int n_dim) {
+	  // matrix + matrix addition
 	  int i, j;
 	  for (i = 0; i < n_dim; i++) {
 
@@ -606,7 +617,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_mx_subtract(double *mx_a, double *mx_b, double *mx_out, int n_dim) {
-	  // this matrix does 'a' - 'b' not the other way!!
+	  // this matrix does 'a' - 'b' (matrix_a - matrix_b) not the other way !!
 	  int i, j;
 	  for (i = 0; i < n_dim; i++) {
 		for (j = 0; j < n_dim; j++) {
@@ -616,6 +627,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_mx_mx_mult(double *mx_a, double *mx_b, double *mx_out, int n_dim) {
+          // matrix * matrix multiplication ... order matters! so be cognizant of which matrix you set for 'a' and 'b'
 	  int i, j, k;
 	  double temp;
 	  int counter = 0;
@@ -633,6 +645,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_mx_transpose(double *mx_in, double *mx_out, int n_dim) {
+	  // matrix transpose
 	  int i, j;
 	  for (i = 0; i < n_dim; i++) {
 		for (j = 0; j < n_dim; j++) {
@@ -642,6 +655,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_scalar_mx_mult(double *mx_in, double *mx_out, double num_mult, int n_dim) {
+	  // scalar * matrix multiplication ... just a simple scalar value multiplying every indice in the matrix
 	  int i, j;
 	  for (i = 0; i < n_dim; i++) {
 		for (j = 0; j < n_dim; j++) {
@@ -651,6 +665,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_mx_copy(double *mx_in, double *mx_out, int n_dim) {
+     	  // just a simple matrix copy of values from one matrix to another ... in MATLAB it is as simple as matrix_A = matrix_B
 	  int i, j;
 	  for (i = 0; i < n_dim; i++) {
 		for (j = 0; j < n_dim; j++) {
@@ -660,6 +675,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_mx_identity(double *mx_out, int n_dim) {
+	  // create identity matrix
 	  int i, j;
 	  for (i = 0; i < n_dim; i++) {
 		for (j = 0; j < n_dim; j++) {
@@ -674,6 +690,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_mx_2x2_inv(double *mx_in, double *mx_out) {
+ 	  // 2x2 matrix inverse
 	  int i, j;
 	  double temp = 1 / (*(mx_in) * *(mx_in + 3) - *(mx_in + 1) * *(mx_in + 2));
 	  *(mx_out) = *(mx_in + 3) * temp;
@@ -700,6 +717,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_vec_scalar_mult(double *vec_in, double *vec_out, double num_mult, int n_len) {
+	  // function to multiply every indice of a vector by a scalar constant
 	  int i;
 	  for (i = 0; i < n_len; i++) {
 		*(vec_out + i) = *(vec_in + i) * num_mult;
@@ -707,6 +725,7 @@ namespace JohnnyKalman {
 	}
 
 	void my_vec_copy(double *vec_in, double *vec_out, int n_len) {
+	  // copy vector into another vector
 	  int i;
 	  for (i = 0; i < n_len; i++) {
 		*(vec_out + i) = *(vec_in + i);
